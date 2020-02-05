@@ -3,6 +3,7 @@ import numpy as np
 from sys import argv
 from functions import c,isvalid, fillnums, next_play, minimaxab, getMove, getChildren, score_G
 import key, strings
+import time
 
 gen = lambda: random.choice([2]*9+[4]*1)
 
@@ -11,25 +12,28 @@ class twnty48:
         self.l1 = l1
         self._l1 = l1 #safe l1
         self.moves = list(range(4))
+    time_s= 0
         
     @classmethod
     def prettyprint(cls, move, l1, count = 0):
         l1 = np.where(l1 == 0, '.', l1) 
-        init = 1
+        init= 1
         m = ["UP   ", "DOWN ", "LEFT ", "RIGHT"]
         print('\r' ' '*5) #extra print needed due to key detection.
         for i in l1:
-            if init: print(f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}" f"\t{m[move]+' '+str(count)}\n") ; init = 0
+            if init:
+                print(f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}" f"\t{m[move]+' '+str(count):<5}",
+                f" T: {time.time()-cls.time_s:.2}s\n" ) ; init = 0
             else: print(f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}\n")
-        #time.sleep(1)
         for i in range(2*len(l1) + 1): print("\033[F",end='', flush=True)
     
     def run(self, plays_c):
-        count = 0
+        count = 1
         history_c = [np.asarray([0])]*10
         tempranmove = False
         move = 0
         if mode==1: Keyobj = key.Key()
+        twnty48.time_s = time.time()#self.time_s = time.time() was updating time of obj's attribute.
         while isvalid(self.l1):
             if mode == 1:
                 Keyobj.listen()
@@ -52,7 +56,7 @@ class twnty48:
             count += 1
         print('\n'*(2*len(l1)))
         score = self.l1.max()
-        print(f"count: {count:>4}, score: {score:>2}")
+        print(f"Steps: {count:>4}, Score: {score:>2},",'Time: {:.2}s'.format(time.time() - twnty48.time_s))
         if score >= 2048:
             if mode==1:print(strings.s6)
             else: print(strings.s5)
