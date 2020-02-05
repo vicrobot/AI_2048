@@ -23,7 +23,7 @@ class twnty48:
         for i in l1:
             if init:
                 print(f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}" f"\t{m[move]+' '+str(count):<5}",
-                f" T: {time.time()-cls.time_s:.2}s\n" ) ; init = 0
+                f" T: {time.time()-cls.time_s:>10.6}s\n" ) ; init = 0
             else: print(f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}\n")
         for i in range(2*len(l1) + 1): print("\033[F",end='', flush=True)
     
@@ -56,7 +56,7 @@ class twnty48:
             count += 1
         print('\n'*(2*len(l1)))
         score = self.l1.max()
-        print(f"Steps: {count:>4}, Score: {score:>2},",'Time: {:.2}s'.format(time.time() - twnty48.time_s))
+        print(f"Steps: {count:>4}, Score: {score:>2},",'Time: {:>6.6}s'.format(time.time() - twnty48.time_s))
         if score >= 2048:
             if mode==1:print(strings.s6)
             else: print(strings.s5)
