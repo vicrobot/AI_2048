@@ -1,6 +1,5 @@
 import random
 import numpy as np
-import sys
 
 gen = lambda: random.choice([2]*9+[4]*1)
 scoregrid = np.asarray([     [4**15,4**14,4**13,4**12],
@@ -44,7 +43,7 @@ def fillnums(l1, flat = 1):
     return l1
 
 def isvalid(l1):
-    #assume l1 is 4 x 4 and there's no none in it.
+    #assume l1 is 4 x 4
     if 0 in l1: return True
     l = []
     for move in range(4):
@@ -71,8 +70,10 @@ def getChildren(data,playerT):
             data1[idx//4][idx - 4*(idx//4)] = 4
             l.append((data1,0.1))
     return l
+
 def score_G(data):
     #heuristics
+    #needs to be upgraded
     grid = scoregrid
     score = (grid * data).sum()
     a1 = -score/8 if (data == 0).sum() < 3 else score/16 #free tile reward
@@ -97,7 +98,7 @@ def minimaxab(data, alpha, beta,depth, maximizing):
         for child in getChildren(data.copy(), True): #will run 4 times at max
             sc = max(sc, minimaxab(child,alpha,beta, depth-1,False))
             if sc >= beta: return sc  #actually it is same as if alpha >= beta, 
-                                        #maximizing player need not to care now
+                                        #maximizing player need not to care now #mamavsbhanja
             alpha = max(alpha, sc)
         return sc
     if not maximizing:
@@ -114,10 +115,9 @@ def getMove(data, plays_c=2):
         moved = c(data.copy(), move)
         if ( moved == data).all(): continue
         score = 0
-        #score += Minimaxab.calculate(moved.copy().flatten().tolist(),plays_c, -np.inf, np.inf, False)
-        score += minimaxab(moved.copy(), -np.inf, np.inf, plays_c, False)    #---->Not Working as expected
-        if move == 0 or move == 2: score+= 10000
-        t_sc = score#sum(scores)/len(scores)#score
+        score += minimaxab(moved.copy(), -np.inf, np.inf, plays_c, False)
+        if move == 0 or move == 2: score+= 10000 #motivation on up or left.
+        t_sc = score
         if t_sc > sc:
             sc= t_sc
             mv = move
