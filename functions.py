@@ -7,7 +7,7 @@ scoregrid = np.asarray([     [4**15,4**14,4**13,4**12],
                              [4**7,4**6,4**5,4**4],
                              [4**0,4**1,4**2,4**3]])
 def left(l1):
-    #assumption: l1 is 4 x 4 matrix
+    #assumption: l1 is 4 x 4 numpy matrix
     l = l1.copy()
     for j in range(4):
         res = []
@@ -28,7 +28,7 @@ def left(l1):
 #v[:,::-1]    #mirrored
 
 def c(l1, move):
-    #assumption: l1 is 4 x 4 matrix
+    #assumption: l1 is 4 x 4 numpy matrix
     if move == 2: return left(l1)
     if move == 0: return left(l1[:,::-1].T).T[:,::-1] #anti, left, clock
     if move == 1: return left(l1.T[:,::-1])[:,::-1].T #clock, left, anti
@@ -73,14 +73,43 @@ def getChildren(data,playerT):
 
 def score_G(data):
     #heuristics
-    #needs to be upgraded
+    """
+    Upgrades needed:
+    1. Smootheness measure.
+    2. It is hard coded for top-left. Needs to be automatically decide for any corner.
+    """
     grid = scoregrid
     score = (grid * data).sum()
-    a1 = -score/8 if (data == 0).sum() < 3 else score/16 #free tile reward
-    a2 = score if data[0][0]>=data[1][0]>=data[2][0] else 0  #monotonicity1 reward
-    a3 = score if data[0][0]>=data[0][1]>=data[0][2]>=data[0][3] else 0  #monotonicity2 reward
+    """
+    Not going in score's dimension is recommended.
     
-    return score + a1+ a2+ a3
+    With below heuristic and 4th level AI: 2048: 50%+
+    
+    div = 100
+    #a1 = -score/div if (data == 0).sum() < 3 else score/10 #free tiles
+    a1 = score/(div*(16-(data == 0).sum()))
+    a2 = score/div if data[0][0]>=data[1][0]>=data[2][0] else 0  #monoton1
+    a3 = score/div if data[0][0]>=data[0][1]>=data[0][2]>=data[0][3] else -score/50 #monoton2
+    a4 = score/div if data[0][3] >= data[1][3] else -score/20
+    a5 = score/div if data.max() == data[0][0] else -score
+    a6 = score/div if data[0][1] >= data[1][1] and data[0][2] >= data[1][2] else -score/2
+    a7 = score/div if data[1][3] >= data[1][2] else -score/20
+    -----------------------------------------------------------------------
+    
+    """
+    div = 300
+    #a1 = -score/div if (data == 0).sum() < 3 else score/10 #free tiles
+    a1 = score/(div*(16-(data == 0).sum()))
+    a2 = score/div if data[0][0]>=data[1][0]>=data[2][0] else 0  #left vert.1 monotone
+    a3 = score/div if data[0][0]>=data[0][1]>=data[0][2]>=data[0][3] else -score/50 #top horz. monotone.
+    a4 = score/div if data[0][3] >= data[1][3] and data[1][3] >= data[1][2] else -score/50 #1to2 rightop corner monotone
+    a5 = score/div if data.max() == data[0][0] else -2*score #max at top left.
+    a6 = score/div if data[0][1] >= data[1][1] >= data[2][1] else -score/2 #vert 2 mono
+    a7 = score/div if data[0][2] >= data[1][2] >= data[2][2] else -score/20  #vert 3 mono
+    a8 = score/div if data[2][2] <= data[1][2] else -score/20
+    
+    return score + a1+ a2+ a3 + a4 + a5 + a6 + a7 + a8
+
 def next_play(l1, move):
     #assumption: l1 is 4 x 4 matrix
     first = c(l1, move)
@@ -122,6 +151,7 @@ def getMove(data, plays_c=2):
             sc= t_sc
             mv = move
         elif t_sc == sc:
+            if mv in [0,2]: continue
             mv = random.choice([mv, move])
     return mv
 
