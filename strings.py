@@ -1,0 +1,6 @@
+s1 = '"$python main.py <mode> <ai_level>": \nmode: 1 for manual play, mode: 0 for AI play.\nDefault selection is manual gameplay:'
+s2 = '"$python main.py <mode> <ai_level>" Use it to specify args.\nDefault AI level 4 selected.'
+s3 = 'Wrong Arguments!\nMode must be 1 or 0. 1 for manual, 0 for AI play.\n AI level must be in [0,9] range.\nDefault selection is manual gameplay'
+s4 = 'Press esc to exit anytime,\nUse up, down, left, right buttons to play'
+s5 = 'APOCALYPSE BEGINS'
+s6 = 'You Won !!!'

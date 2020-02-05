@@ -2,7 +2,7 @@ import random
 import numpy as np
 from sys import argv
 from functions import c,isvalid, fillnums, next_play, minimaxab, getMove, getChildren, score_G
-import key
+import key, strings
 
 gen = lambda: random.choice([2]*9+[4]*1)
 
@@ -54,13 +54,25 @@ class twnty48:
         score = self.l1.max()
         print(f"count: {count:>4}, score: {score:>2}")
         if score >= 2048:
-            if mode==1:print('You Won !!!')
-            else: print('APOCALYPSE BEGINS')
+            if mode==1:print(strings.s6)
+            else: print(strings.s5)
 
 if __name__ == '__main__':
-    try: mode, AI_level = int(argv[1]), int(argv[2])  # mode 0 means AI Autoplay, mode 1 means human manual play
-    except: mode,AI_level = 1,0
-    if mode: print('Press esc to exit anytime,' , '\nUse up, down, left, right buttons to play')
+    # mode 0: AI Autoplay, mode 1: human manual play
+    if len(argv[1:]) == 0:
+        print(strings.s1)
+        mode,AI_level = 1,0
+    elif len(argv[1:]) == 1:
+        if int(argv[1]) != 1:
+            print(strings.s2)
+            mode, AI_level = 0, 4
+        else: mode, AI_level = 1, 0
+    elif len(argv[1:]) >= 2 and int(argv[1]) not in [1,0] or int(argv[2]) not in range(1,10):
+        mode, AI_level = 1,0
+        print(strings.s3)
+    else: mode, AI_level = int(argv[1]), int(argv[2])
+    
+    if mode: print(strings.s4)
     l1 = np.asarray([0 for i in range(16)])
     l1 = fillnums(fillnums(l1)).reshape(4,4)
     f = twnty48(l1)
