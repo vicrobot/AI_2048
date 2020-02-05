@@ -27,9 +27,9 @@ class twnty48:
             else: print(f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}\n")
         for i in range(2*len(l1) + 1): print("\033[F",end='', flush=True)
     
-    def run(self, plays_c):
+    def run(self, plays_c, mode = 0,show = True):
         count = 1
-        history_c = [np.asarray([0])]*10
+        history_c = [np.asarray([0])]*(10 if show else 5)
         tempranmove = False
         move = 0
         if mode==1: Keyobj = key.Key()
@@ -52,11 +52,16 @@ class twnty48:
                 if all([(i==j).all() for i in history_c for j in history_c]): tempranmove = True
                 
             self.l1 = next_play(self.l1.copy(), move)
+            if not show: continue
             self.prettyprint(move, self.l1.reshape(4,4), count = count)
             count += 1
-        print('\n'*(2*len(l1)))
         score = self.l1.max()
-        print(f"Steps: {count:>4}, Score: {score:>2},",'Time: {:>6.6}s'.format(time.time() - twnty48.time_s))
+        if not show:
+            return count, score, time.time() - twnty48.time_s
+        print('\n'*(2*len(l1)))
+        final_T = time.time() - twnty48.time_s
+        print(f"Steps: {count:>4}, Score: {score:>2},",'Time: {:>6.6}s,'.format(final_T),end = '')
+        print(f" Average Steps/s: {count/final_T:5.4}")
         if score >= 2048:
             if mode==1:print(strings.s6)
             else: print(strings.s5)
@@ -81,7 +86,7 @@ if __name__ == '__main__':
     l1 = fillnums(fillnums(l1)).reshape(4,4)
     f = twnty48(l1)
     if mode: f.prettyprint(0, l1)
-    f.run(AI_level)
+    f.run(AI_level, mode = mode)
 
 
 
