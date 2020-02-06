@@ -22,9 +22,8 @@ class twnty48:
         print('\r' ' '*5) #extra print needed due to key detection.
         for i in l1:
             if init:
-                print(f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}" f"\t{m[move]+' '+str(count):<5}",
-                f" T: {time.time()-cls.time_s:>10.6}s\n" ) ; init = 0
-            else: print(f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}\n")
+                print(eval(strings.s7),eval(strings.s9),'\n') ; init = 0
+            else: print(eval(strings.s8),'\n')
         for i in range(2*len(l1) + 1): print("\033[F",end='', flush=True)
     
     def run(self, plays_c, mode = 0,show = True):

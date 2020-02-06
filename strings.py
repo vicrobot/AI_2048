@@ -4,3 +4,6 @@ s3 = 'Wrong Arguments!\nMode must be 1 or 0. 1 for manual, 0 for AI play.\n AI l
 s4 = 'Press esc to exit anytime,\nUse up, down, left, right buttons to play'
 s5 = 'APOCALYPSE BEGINS'
 s6 = 'You Won !!!'
+s7 = 'f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}" f"\t{m[move]+ \' \'+str(count):<5}"'
+s9 = 'f" T: {time.time()-cls.time_s:>10.6}s"'
+s8 = 'f"    {i[0]:>5}\t{i[1]:>5}\t{i[2]:>5}\t{i[3]:>5}"'

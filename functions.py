@@ -104,7 +104,7 @@ def score_G(data):
     a3 = score/div if data[0][0]>=data[0][1]>=data[0][2]>=data[0][3] else -score/50 #top horz. monotone.
     a4 = score/div if data[0][3] >= data[1][3] and data[1][3] >= data[1][2] else -score/50 #1to2 rightop corner monotone
     a5 = score/div if data.max() == data[0][0] else -2*score #max at top left.
-    a6 = score/div if data[0][1] >= data[1][1] >= data[2][1] else -score/2 #vert 2 mono
+    a6 = score/div if data[0][1] >= data[1][1] >= data[2][1] else -score/3 #vert 2 mono
     a7 = score/div if data[0][2] >= data[1][2] >= data[2][2] else -score/20  #vert 3 mono
     a8 = score/div if data[2][2] <= data[1][2] else -score/20
     
@@ -138,7 +138,7 @@ def minimaxab(data, alpha, beta,depth, maximizing):
             beta = min(beta, sc)
         return sc
 
-def getMove(data, plays_c=2):
+def getMove(data, plays_c=4):
     sc, mv = float('-inf'), 5
     for  move in range(4):
         moved = c(data.copy(), move)
