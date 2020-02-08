@@ -21,8 +21,7 @@ class twnty48:
         m = ["UP   ", "DOWN ", "LEFT ", "RIGHT"]
         print('\r' ' '*5) #extra print needed due to key detection.
         for i in l1:
-            if init:
-                print(eval(strings.s7),eval(strings.s9),'\n') ; init = 0
+            if init:print(eval(strings.s7),eval(strings.s9),'\n') ; init = 0
             else: print(eval(strings.s8),'\n')
         for i in range(2*len(l1) + 1): print("\033[F",end='', flush=True)
     
@@ -33,6 +32,7 @@ class twnty48:
         move = 0
         if mode==1: Keyobj = key.Key()
         twnty48.time_s = time.time()#self.time_s = time.time() was updating time of obj's attribute.
+        n_m = False
         while isvalid(self.l1):
             if mode == 1:
                 Keyobj.listen()
@@ -40,16 +40,21 @@ class twnty48:
                 if move not in self.moves:break
             else:
                 if not tempranmove:
-                    move = getMove(data = self.l1.copy(), plays_c = plays_c) 
+                    if n_m: move = 0; n_m = False
+                    else:
+                        move = getMove(data = self.l1.copy(), plays_c = plays_c) 
+                        if move not in self.moves:
+                            move = 1; n_m = True
                 else:
+                    tempranmove= False 
                     if (self.l1[-1] == [0]*4).all(): move = random.choice(self.moves) 
                     #intense need of down move, prob=.25
-                    else:move = random.choice([0,2,0,0,2,3,3,0,2]); tempranmove= False 
-                    # when game stuck, down move prob = 0.
+                    else:move = random.choice([0,2,0,0,2,3,3,0,2,1]) 
+                    # when game stuck, down move prob = 0.1
+                    if move == 1: n_m = True
                     
                 history_c=history_c[1:] + [self.l1.copy()]
                 if all([(i==j).all() for i in history_c for j in history_c]): tempranmove = True
-                
             self.l1 = next_play(self.l1.copy(), move)
             if not show: continue
             self.prettyprint(move, self.l1.reshape(4,4), count = count)
@@ -75,7 +80,7 @@ if __name__ == '__main__':
             print(strings.s2)
             mode, AI_level = 0, 4
         else: mode, AI_level = 1, 0
-    elif len(argv[1:]) >= 2 and int(argv[1]) not in [1,0] or int(argv[2]) not in range(1,10):
+    elif len(argv[1:]) >= 2 and int(argv[1]) not in [1,0]:# or int(argv[2]) not in range(1,10):
         mode, AI_level = 1,0
         print(strings.s3)
     else: mode, AI_level = int(argv[1]), int(argv[2])
