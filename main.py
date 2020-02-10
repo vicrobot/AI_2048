@@ -2,7 +2,7 @@ import random
 import numpy as np
 from sys import argv
 from functions import fillnums, minimaxab, getChildren, score_G
-from show import getMove, next_play, isvalid
+from grid import getMove, next_play, isvalid
 import key, strings
 import time
 
