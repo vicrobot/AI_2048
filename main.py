@@ -1,7 +1,8 @@
 import random
 import numpy as np
 from sys import argv
-from functions import c,isvalid, fillnums, next_play, minimaxab, getMove, getChildren, score_G
+from functions import fillnums, minimaxab, getChildren, score_G
+from show import getMove, next_play, isvalid
 import key, strings
 import time
 
@@ -24,7 +25,7 @@ class twnty48:
             if init:print(eval(strings.s7),eval(strings.s9),'\n') ; init = 0
             else: print(eval(strings.s8),'\n')
         for i in range(2*len(l1) + 1): print("\033[F",end='', flush=True)
-    
+
     def run(self, plays_c, mode = 0,show = True):
         count = 1
         history_c = [np.asarray([0])]*(10 if show else 5)
@@ -42,7 +43,7 @@ class twnty48:
                 if not tempranmove:
                     if n_m: move = 0; n_m = False
                     else:
-                        move = getMove(data = self.l1.copy(), plays_c = plays_c) 
+                        move = getMove(self.l1.copy(), plays_c) 
                         if move not in self.moves:
                             move = 1; n_m = True
                 else:
