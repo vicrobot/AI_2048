@@ -1,5 +1,7 @@
 from random import choice, random
 import numpy as np
+from show import c
+import pickle
 
 gen = lambda: 2 if random() < .9 else 4
 scoregrid = np.asarray([     [4**15,4**14,4**13,4**12],
@@ -8,35 +10,60 @@ scoregrid = np.asarray([     [4**15,4**14,4**13,4**12],
                              [4**0,4**1,4**2,4**3]])
 ind = np.arange(16).reshape(4,4)
 ind1 = np.arange(16)
-def left(l1):
-    #assumption: l1 is 4 x 4 numpy matrix
-    l = l1.copy()
-    for j in range(4):
-        res = []
-        merged = False
-        for i in l[j]:
-            if i==0:continue
-            if res and i == res[-1] and not merged:
-                res[-1] += i
-                merged = True #this merged will be broken up only when next i!= res[-1] occurs.
-            else:
-                if res and res[-1]!= 0: merged = False  # here will come only when i!= res[-1]
-                res.append(i)
-        for i in range(4 - len(res)): res.append(0)
-        l[j] = res
-    return l
-#v.T[:,::-1]  #clockwise
-#v[:,::-1].T  #anticlockwise
-#v[:,::-1]    #mirrored
 
-def c(l1, move):
-    #copyproof
-    #assumption: l1 is 4 x 4 numpy matrix
-    if move == 2: return left(l1)
-    if move == 0: return left(l1[:,::-1].T).T[:,::-1] #anti, left, clock
-    if move == 1: return left(l1.T[:,::-1])[:,::-1].T #clock, left, anti
-    if move == 3: return left(l1[:,::-1])[:,::-1]# mirrored, left, mirrored
+def isvalid(grid):
+    #assume grid is 4 x 4 numpy matrix
+    if 0 in grid: return True #0 indicates empty place's availability.
+    for move in range(4):
+        moved = not (grid == c(grid,move)).all()
+        if moved:return True
+    return False
 
+def next_play(grid, move):
+    #assumption: grid is 4 x 4 matrix
+    if move not in range(4): return grid #invalid move.
+    moved_grid = c(grid, move)           # c moves grid by specific move "move".
+    moved = not (moved_grid == grid).all()
+    if not moved: return grid # return as it was
+    p = ind[moved_grid==0]
+    if len(p) == 0: return moved_grid  #no spawn needed
+    idx = choice(p) #randomly picked empty place's index
+    moved_grid[idx//4][idx%4] = 2 if random() < .9 else 4
+    return moved_grid
+
+def rand_moves(data,first_move,times): #data is playing grid, numpy matrix 4 x 4
+    #monte_carlo implementation
+    assert times >0, 'Wrong value of times'
+    score = 0
+    k = range(4)
+    for _ in range(times):
+        data1 = data.copy()
+        data1 = next_play(data1, first_move) #next_play moves grid & generate tile randomly on an empty place if moved
+        while isvalid(data1):                #isvalid checks validity of grid, ie playable or not.
+            data1 = next_play(data1, choice(k)) #choice is random.choice func.
+            score+= data1.max()
+    return score/times
+
+def getAvailableMoves(data):
+    data_list= [(c(data,i),i) for i in range(4)]
+    ret = []
+    for data1,i in data_list:
+        if (data1==data).all():continue
+        else:
+            ret.append(i)
+    return ret
+
+def getMove(data, times = 10):   #monte-carlo version
+    sc, mv = float('-inf'), None
+    for move in getAvailableMoves(data):
+        score = 0
+        score += rand_moves(data.copy(),move,times)
+        if score > sc:
+            sc= score
+            mv = move
+        elif score == sc:
+            mv = choice([mv, move]) #randomly choose one of them
+    return mv #if none, case handing occurs at caller side.
 
 def fillnums(l1, flat = 1):
     #notcopyproof
@@ -46,15 +73,6 @@ def fillnums(l1, flat = 1):
         l1[k//4][k%4] = 2 if random() < .9 else 4
     else:l1[choice(ind1[l1==0])] = 2 if random() < .9 else 4
     return l1
-
-def isvalid(l1):
-    #copyproof
-    #assume l1 is 4 x 4
-    if 0 in l1: return True
-    for move in range(4):
-        b = (l1 == c(l1,move)).all()
-        if not b:return True
-    return False
 
 def getChildren(data,playerT):
     #copyproof
@@ -115,17 +133,6 @@ def score_G(data):
     
     return score + a1+ a2+ a3 + a4 + a5 + a6 + a7 + a8
 
-def next_play(l1, move):
-    #assumption: l1 is 4 x 4 matrix
-    first = c(l1, move)
-    if type(first)==type(None):return l1
-    k = (first == l1).all()
-    if 0 in first:
-        if k: return l1
-        else: return fillnums(first, flat = 0)
-    if not k: return (fillnums(first, flat = 0)) if isvalid(l1) else l1
-    else: return first if isvalid(l1) else l1
-
 def expectimax(data,depth, maximizing):
     if depth <= 0 or not isvalid(data): return score_G(data)
     if maximizing:
@@ -139,18 +146,6 @@ def expectimax(data,depth, maximizing):
         for child,w in t:
             sc += w*expectimax(child,depth-1,True)
         return sc/len(t)
-
-def monte_carlo(data,move,plays_c=10):
-    assert plays_c >0, 'Wrong value of plays_c'
-    score = 0
-    k = range(4)
-    for j in range(plays_c):
-        data1 = data.copy()
-        data1 = next_play(data1, move)
-        while isvalid(data1):
-            data1 = next_play(data1, choice(k))
-            score+= data1.max()
-    return score/plays_c
 
 def minimaxab(data, alpha, beta,depth, maximizing):
     #funcs used: isvalid, score_G, getChildren
@@ -171,8 +166,8 @@ def minimaxab(data, alpha, beta,depth, maximizing):
             beta = min(beta, sc)
         return sc
 
-
-def getMove(data, plays_c=4):
+"""
+def getMove(data, plays_c):
     sc, mv = float('-inf'), 5
     for  move in range(4):
         moved = c(data.copy(), move)
@@ -188,11 +183,11 @@ def getMove(data, plays_c=4):
             if mv in [0,2]: continue
             mv = random.choice([mv, move])
     return mv
-
+"""
 """
 #Other versions of getMove, slight modifications:
 
-def getMove(data, plays_c=4):
+def getMove(data, plays_c):
     #snake strategy with minimaxab
     sc, mv = float('-inf'), 5
     mx = data.max()
@@ -213,7 +208,7 @@ def getMove(data, plays_c=4):
             mv = choice([mv, move])
     return mv
 
-def getMove(data, plays_c=4):              #monte carlo version
+def getMove(data, plays_c):              #monte carlo version
     sc, mv = float('-inf'), 5
     mx = data.max()
     for move in [0,1,2,3]:
@@ -228,7 +223,7 @@ def getMove(data, plays_c=4):              #monte carlo version
             mv = choice([mv, move])
     return mv
 
-Other modified heuristics:
+Other modified heuristics for snake strategy:
     div = 300
     #a1 = -score/div if (data == 0).sum() < 3 else score/10 #free tiles
     a1 = score/(div*(16-(data == 0).sum()))
