@@ -41,11 +41,14 @@ def c(grid, move):
     if move == 3: return r(grid)
 
 def isvalid(grid):
-    #assume grid is 4 x 4 numpy matrix
-    if 0 in grid: return True #0 indicates empty place's availability.
-    for move in range(4):
-        moved = not (grid == c(grid,move)).all()
-        if moved:return True
+    if 0 in grid: return True
+    l = grid
+    for i in range(3):
+        for j in range(4):
+            if l[i][j] == l[i+1][j]: return True
+        if l[i][0] == l[i][1] or l[i][1] == l[i][2] or l[i][2] == l[i][3]: return True
+    i = 3
+    if l[i][0] == l[i][1] or l[i][1] == l[i][2] or l[i][2] == l[i][3]: return True
     return False
 
 ind = np.arange(16).reshape(4,4)
