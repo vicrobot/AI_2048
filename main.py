@@ -1,8 +1,8 @@
 import random
 import numpy as np
 from sys import argv
-from functions import fillnums, minimaxab, getChildren, score_G
-from grid import getMove, next_play, isvalid
+from functions import fillnums, minimaxab, getChildren, score_G, getMove
+from grid import next_play, isvalid #, getMove
 import key, strings
 import time
 

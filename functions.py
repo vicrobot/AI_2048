@@ -1,6 +1,6 @@
 from random import choice, random
 import numpy as np
-from show import c
+from grid import next_play, isvalid, c
 import pickle
 
 gen = lambda: 2 if random() < .9 else 4
@@ -10,26 +10,6 @@ scoregrid = np.asarray([     [4**15,4**14,4**13,4**12],
                              [4**0,4**1,4**2,4**3]])
 ind = np.arange(16).reshape(4,4)
 ind1 = np.arange(16)
-
-def isvalid(grid):
-    #assume grid is 4 x 4 numpy matrix
-    if 0 in grid: return True #0 indicates empty place's availability.
-    for move in range(4):
-        moved = not (grid == c(grid,move)).all()
-        if moved:return True
-    return False
-
-def next_play(grid, move):
-    #assumption: grid is 4 x 4 matrix
-    if move not in range(4): return grid #invalid move.
-    moved_grid = c(grid, move)           # c moves grid by specific move "move".
-    moved = not (moved_grid == grid).all()
-    if not moved: return grid # return as it was
-    p = ind[moved_grid==0]
-    if len(p) == 0: return moved_grid  #no spawn needed
-    idx = choice(p) #randomly picked empty place's index
-    moved_grid[idx//4][idx%4] = 2 if random() < .9 else 4
-    return moved_grid
 
 def rand_moves(data,first_move,times): #data is playing grid, numpy matrix 4 x 4
     #monte_carlo implementation
@@ -53,7 +33,27 @@ def getAvailableMoves(data):
             ret.append(i)
     return ret
 
-def getMove(data, times = 10):   #monte-carlo version
+def getMove(data, plays_c):#snake strategy. Not much efficient as hardcoded stuffs are here.
+    sc, mv = float('-inf'), 5
+    mx = data.max()
+    for  move in getAvailableMoves(data):
+        moved = c(data.copy(), move) 
+        if mx == data[0][0] and moved.max() != moved[0][0]:continue #stuck the head; temp added
+        if ( moved == data).all(): continue
+        score = 0
+        score += minimaxab(moved.copy(), -np.inf, np.inf, plays_c, False)
+        if move == 0 or move == 2: score+= 10000 #motivation on up or left.
+        t_sc = score
+        if t_sc > sc:
+            sc= t_sc
+            mv = move
+        elif t_sc == sc:
+            if mv in [0,2]: continue
+            mv = random.choice([mv, move])
+    return mv
+
+"""
+def getMove(data, times = 10):   #monte-carlo version                    #enable it to see monte carlo version.
     sc, mv = float('-inf'), None
     for move in getAvailableMoves(data):
         score = 0
@@ -64,7 +64,7 @@ def getMove(data, times = 10):   #monte-carlo version
         elif score == sc:
             mv = choice([mv, move]) #randomly choose one of them
     return mv #if none, case handing occurs at caller side.
-
+"""
 def fillnums(l1, flat = 1):
     #notcopyproof
     if 0 not in l1: return l1
