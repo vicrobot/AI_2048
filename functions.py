@@ -13,6 +13,8 @@ ind1 = np.arange(16)
 
 
 """
+#enable this block to see snake version.
+
 def getMove(data, plays_c):#snake strategy. Not much efficient as hardcoded stuffs are here.
     sc, mv = float('-inf'), 5
     mx = data.max()
@@ -32,7 +34,7 @@ def getMove(data, plays_c):#snake strategy. Not much efficient as hardcoded stuf
             mv = random.choice([mv, move])
     return mv
 """
-def getMove(data, times = 10):   #monte-carlo version                    #enable it to see monte carlo version.
+def getMove(data, times = 10):   #monte-carlo version                    
     sc, mv = float('-inf'), None
     for move in getAvailableMoves(data):
         score = 0
