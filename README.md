@@ -7,14 +7,16 @@ Install by this command:
     $ pip3 install -r requirements.txt
 
 Game uses cpython for speedups.
+
 Setups:
+
 **On Linux**
 
     $ python setup.py build_ext --inplace &>/dev/null
 
 **On Windows**
 
-Read ![this](https://github.com/cython/cython/wiki/InstallingOnWindows) guide and set cython in your system.
+Read [this](https://github.com/cython/cython/wiki/InstallingOnWindows) guide and set cython in your system.
 Installing cython is done by requirements.txt
 Then run:
     $ python setup.py build_ext --inplace
