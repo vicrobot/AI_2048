@@ -13,7 +13,7 @@ def left(grid):
             if res: merged = False
             res.append(t)
     for i in range(4 - len(res)): res=[0]+res
-    l = res[::-1]
+    l = np.asarray(res[::-1], dtype = np.int64)
     return l
 
 def right(grid):
@@ -30,14 +30,14 @@ def right(grid):
             if res: merged = False
             res.append(t)
     for i in range(4-len(res)): res = [0]+res
-    l = res
+    l = np.asarray(res, dtype = np.int64)
     return l
 
 t = [0] + [2**i for i in range(1, 20)]
 set1 = set([])
 from itertools import combinations_with_replacement as cwr
 from itertools import permutations as pm
-
+import numpy as np
 for i in cwr(t, 4):
     for j in pm(i):
         set1.add(j)

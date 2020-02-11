@@ -14,7 +14,7 @@ class twnty48:
         self._l1 = l1 #safe l1
         self.moves = list(range(4))
     time_s= 0
-        
+    
     @classmethod
     def prettyprint(cls, move, l1, count = 0):
         l1 = np.where(l1 == 0, '.', l1) 
@@ -43,7 +43,7 @@ class twnty48:
                 if not tempranmove:
                     if n_m: move = 0; n_m = False
                     else:
-                        move = getMove(self.l1.copy(), plays_c) 
+                        move = getMove(self.l1.copy(), plays_c)
                         if move not in self.moves:
                             move = 1; n_m = True
                 else:

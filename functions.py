@@ -1,6 +1,6 @@
 from random import choice, random
 import numpy as np
-from grid import next_play, isvalid, c
+from grid import next_play, isvalid, c, rand_moves
 import pickle
 
 gen = lambda: 2 if random() < .9 else 4
@@ -11,18 +11,6 @@ scoregrid = np.asarray([     [4**15,4**14,4**13,4**12],
 ind = np.arange(16).reshape(4,4)
 ind1 = np.arange(16)
 
-def rand_moves(data,first_move,times): #data is playing grid, numpy matrix 4 x 4
-    #monte_carlo implementation
-    assert times >0, 'Wrong value of times'
-    score = 0
-    k = range(4)
-    for _ in range(times):
-        data1 = data.copy()
-        data1 = next_play(data1, first_move) #next_play moves grid & generate tile randomly on an empty place if moved
-        while isvalid(data1):                #isvalid checks validity of grid, ie playable or not.
-            data1 = next_play(data1, choice(k)) #choice is random.choice func.
-            score+= data1.max()
-    return score/times
 
 def getAvailableMoves(data):
     data_list= [(c(data,i),i) for i in range(4)]
@@ -32,7 +20,7 @@ def getAvailableMoves(data):
         else:
             ret.append(i)
     return ret
-
+"""
 def getMove(data, plays_c):#snake strategy. Not much efficient as hardcoded stuffs are here.
     sc, mv = float('-inf'), 5
     mx = data.max()
@@ -64,7 +52,7 @@ def getMove(data, times = 10):   #monte-carlo version                    #enable
         elif score == sc:
             mv = choice([mv, move]) #randomly choose one of them
     return mv #if none, case handing occurs at caller side.
-"""
+
 def fillnums(l1, flat = 1):
     #notcopyproof
     if 0 not in l1: return l1
