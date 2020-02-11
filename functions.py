@@ -1,6 +1,6 @@
 from random import choice, random
 import numpy as np
-from grid import next_play, isvalid, c, rand_moves
+from grid import next_play, isvalid, c, rand_moves, getAvailableMoves
 import pickle
 
 gen = lambda: 2 if random() < .9 else 4
@@ -12,14 +12,6 @@ ind = np.arange(16).reshape(4,4)
 ind1 = np.arange(16)
 
 
-def getAvailableMoves(data):
-    data_list= [(c(data,i),i) for i in range(4)]
-    ret = []
-    for data1,i in data_list:
-        if (data1==data).all():continue
-        else:
-            ret.append(i)
-    return ret
 """
 def getMove(data, plays_c):#snake strategy. Not much efficient as hardcoded stuffs are here.
     sc, mv = float('-inf'), 5
@@ -39,7 +31,6 @@ def getMove(data, plays_c):#snake strategy. Not much efficient as hardcoded stuf
             if mv in [0,2]: continue
             mv = random.choice([mv, move])
     return mv
-
 """
 def getMove(data, times = 10):   #monte-carlo version                    #enable it to see monte carlo version.
     sc, mv = float('-inf'), None
