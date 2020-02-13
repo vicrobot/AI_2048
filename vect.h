@@ -205,6 +205,13 @@ class myvec{
         }
     public:
         int random(int from, int to){
+            /*
+            Concept: rand() generates an integer between 0 and RAND_MAX.
+            It is guaranteed that this gives atleast 32000 or something and above num.
+            Let it be x. By modulo arithmatic, x%y (assume x > y), will give num b/w 0 to y-1.
+            Thus x%(y+1) + p will give num from p to y+p randomly. Thus; as we want [p, y+p] as [from, to],
+            thus, we do rand()%(to-from + 1) + from, since then we'll get num b/w [from, to-from+from] = [from, to] 
+            */
             return rand() % (to - from + 1) + from;
         }
     public:
