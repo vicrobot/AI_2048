@@ -6,9 +6,12 @@
 
 using namespace std;
 class myvec{
-
+    public:
+        int moved_temp = 1;
     public:
     myvec () {
+    srand(time(NULL));
+    
     }
         public:
         vector <vector<int> > left(vector<vector<int> > vect){
@@ -207,7 +210,8 @@ class myvec{
         }
         
         public:
-        vector<vector<int> > fillnum_m(vector<vector<int> > vect){
+        vector<vector<int> > fillnum_m(vector<vector<int> > vect1){
+            vector<vector<int> > vect = vect1;
             vector<int> indx;
             for(int i = 0;i<4;i++){
                 for(int j=0;j<4;j++){
@@ -248,20 +252,24 @@ class myvec{
             if(move>3 or move<0){return vect;}
             vector<vector<int> > moved_grid = c(vect, move);
             int moved = hasMoved(vect, moved_grid);
-            if(moved == 0){ return vect;}//return as it was
+            if(moved == 0){moved_temp = 0; return vect;}//return as it was
             moved_grid = fillnum_m(moved_grid);
             return moved_grid;
         }
         
         public:
             double rand_moves(vector<vector<int> > vect, int first_move, int times){
-                int score = 0;
+                int score = maxim(vect);
                 vector<vector<int> > vect1;
                 vector<vector<int> > vect2 = c(vect, first_move);
                 for(int p=0; p<times; p++){
                     vect1 = fillnum_m(vect2);
                     while(isvalid(vect1)==1){
                         vect1 = next_play(vect1, random(0,3));
+                        if(moved_temp==0){
+                            moved_temp = 1;
+                            continue;
+                        }
                         score += maxim(vect1);
                     }
                 }
