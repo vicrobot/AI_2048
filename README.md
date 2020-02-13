@@ -30,5 +30,5 @@ For AI, put mode on 0 and specify AI level > 1 and integer.
 
 Ex:
 
-    $ python main.py 0 60 
+    $ python main.py 0 200 
  
