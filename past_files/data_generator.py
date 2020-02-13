@@ -54,7 +54,7 @@ print(len(d1), len(d2))
 ds=[d1, d2]
 
 import pickle
-with open('ds1.pickle', 'wb') as var:
+with open('ds.pickle', 'wb') as var:
     pickle.dump(ds, var)
 
 
