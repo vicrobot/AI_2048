@@ -9,11 +9,10 @@ class myvec{
     public:
         int moved_temp = 1;
     public:
-    myvec () {
-    srand(time(NULL));
-    
-    }
-        public:
+        myvec () {
+        srand(time(NULL));
+        }
+    public:
         vector <vector<int> > left(vector<vector<int> > vect){
         vector <vector<int> > result;
         int j;
@@ -48,7 +47,7 @@ class myvec{
             }
             return result;
         }
-        public:
+    public:
         vector <vector<int> > right(vector<vector<int> > vect){
         vector <vector<int> > result;
         int j;
@@ -82,7 +81,7 @@ class myvec{
             
             return result;
         }
-        public:
+    public:
         vector <int> l(vector<int> vect){
         vector <int> result;
             vector <int> res;
@@ -115,7 +114,7 @@ class myvec{
             
             return result;
         }
-        public:
+    public:
         vector <int > r(vector<int > vect){
         vector <int > result;
             vector <int> res;
@@ -147,7 +146,7 @@ class myvec{
             
             return result;
         }
-        public:
+    public:
         vector <vector<int> > up(vector<vector<int> > vect){
         vector <vector<int> > result = vect;
         for(int i = 0; i <4;i++){
@@ -163,7 +162,7 @@ class myvec{
         }
         return result;
         }
-        public:
+    public:
         vector <vector<int> > down(vector<vector<int> > vect){
         vector <vector<int> > result = vect;
         for(int i = 0; i <4;i++){
@@ -179,15 +178,14 @@ class myvec{
         }
         return result;
         }
-        public:
+    public:
         vector <vector<int> > c(vector<vector<int> > vect, int move){
         if(move == 0){ return up(vect);}
         if(move == 1){ return down(vect);}
         if(move == 2){ return left(vect);}
         if(move == 3){ return right(vect);}
         }
-        
-        public:
+    public:
         int isvalid(vector<vector<int> > vect){
             int i, j;
             if(vect[3][3] == 0){return 1;}
@@ -205,17 +203,18 @@ class myvec{
             }
         return 0;
         }
+    public:
         int random(int from, int to){
             return rand() % (to - from + 1) + from;
         }
-        
-        public:
+    public:
         vector<vector<int> > fillnum_m(vector<vector<int> > vect1){
             vector<vector<int> > vect = vect1;
             vector<int> indx;
+            int t;
             for(int i = 0;i<4;i++){
                 for(int j=0;j<4;j++){
-                    int t = vect[i][j];
+                    t = vect[i][j];
                     if(t == 0){indx.push_back(4*i + j);}
                 }
             }
@@ -225,8 +224,7 @@ class myvec{
             vect[(int)(num/4)][num%4] = m1;
             return vect;
         }
-        
-        public:
+    public:
         int maxim(vector<vector<int> > vect){
             int m =0;
             for(int i = 0;i<4;i++){
@@ -236,8 +234,7 @@ class myvec{
             }
             return m;
         }
-        
-        public:
+    public:
         int hasMoved(vector<vector<int> > v1, vector<vector<int> > v2){
             for(int i = 0;i<4;i++){
                 for(int j=0;j<4;j++){
@@ -246,8 +243,7 @@ class myvec{
             }
             return 0;//didn't moved
         }
-            
-        public:
+    public:
         vector<vector<int> > next_play(vector<vector<int> > vect, int move){
             if(move>3 or move<0){return vect;}
             vector<vector<int> > moved_grid = c(vect, move);
@@ -256,8 +252,7 @@ class myvec{
             moved_grid = fillnum_m(moved_grid);
             return moved_grid;
         }
-        
-        public:
+    public:
             double rand_moves(vector<vector<int> > vect, int first_move, int times){
                 int score = maxim(vect);
                 vector<vector<int> > vect1;
