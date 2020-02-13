@@ -1,7 +1,6 @@
 from random import choice, random
 import numpy as np
 from grid import next_play, isvalid, c, rand_moves, getAvailableMoves
-import pickle
 
 gen = lambda: 2 if random() < .9 else 4
 scoregrid = np.asarray([     [4**15,4**14,4**13,4**12],
@@ -10,10 +9,6 @@ scoregrid = np.asarray([     [4**15,4**14,4**13,4**12],
                              [4**0,4**1,4**2,4**3]])
 ind = np.arange(16).reshape(4,4)
 ind1 = np.arange(16)
-
-
-"""
-#enable this block to see snake version.
 
 def getMove(data, plays_c):#snake strategy. Not much efficient as hardcoded stuffs are here.
     sc, mv = float('-inf'), 5
@@ -33,27 +28,6 @@ def getMove(data, plays_c):#snake strategy. Not much efficient as hardcoded stuf
             if mv in [0,2]: continue
             mv = random.choice([mv, move])
     return mv
-"""
-def getMove(data, times = 10):   #monte-carlo version                    
-    sc, mv = float('-inf'), None
-    for move in getAvailableMoves(data):
-        score = 0
-        score += rand_moves(data.copy(),move,times)
-        if score > sc:
-            sc= score
-            mv = move
-        elif score == sc:
-            mv = choice([mv, move]) #randomly choose one of them
-    return mv #if none, case handing occurs at caller side.
-
-def fillnums(l1, flat = 1):
-    #notcopyproof
-    if 0 not in l1: return l1
-    if flat != 1:
-        k = choice(ind[l1==0])
-        l1[k//4][k%4] = 2 if random() < .9 else 4
-    else:l1[choice(ind1[l1==0])] = 2 if random() < .9 else 4
-    return l1
 
 def getChildren(data,playerT):
     #copyproof

@@ -1,12 +1,12 @@
 import random
 import numpy as np
 from sys import argv
-from functions import fillnums, minimaxab, getChildren, score_G, getMove
-from grid import next_play, isvalid #, getMove
+#from functions import getMove  # for snake strategy. Not as efficient as monte-carlo.
+from grid import next_play, isvalid, getMove
 import key, strings
 import time
 
-gen = lambda: random.choice([2]*9+[4]*1)
+#gen = lambda: random.choice([2]*9+[4]*1)
 
 class twnty48:
     def __init__(self, l1):
@@ -20,20 +20,19 @@ class twnty48:
         l1 = np.where(l1 == 0, '.', l1) 
         init= 1
         m = ["UP   ", "DOWN ", "LEFT ", "RIGHT"]
-        print('\r' ' '*5) #extra print needed due to key detection.
+        print('\r' ' '*5)
         for i in l1:
             if init:print(eval(strings.s7),eval(strings.s9),'\n') ; init = 0
             else: print(eval(strings.s8),'\n')
         for i in range(2*len(l1) + 1): print("\033[F",end='', flush=True)
 
-    def run(self, plays_c, mode = 0,show = True):
+    def run(self, plays_c, mode = 0,show = True): #no show, no prints.
         count = 1
-        history_c = [np.asarray([0])]*(10 if show else 5)
+        history_c = [np.asarray([0])]*5
         tempranmove = False
         move = 0
         if mode==1: Keyobj = key.Key()
-        twnty48.time_s = time.time()#self.time_s = time.time() was updating time of obj's attribute.
-        n_m = False
+        twnty48.time_s = time.time()
         while isvalid(self.l1):
             if mode == 1:
                 Keyobj.listen()
@@ -41,19 +40,11 @@ class twnty48:
                 if move not in self.moves:break
             else:
                 if not tempranmove:
-                    if n_m: move = 0; n_m = False
-                    else:
-                        move = getMove(self.l1.copy(), plays_c)
-                        if move not in self.moves:
-                            move = 1; n_m = True
+                    move = getMove(self.l1.copy(), plays_c)
+                    if move not in self.moves: move = 1
                 else:
                     tempranmove= False 
-                    if (self.l1[-1] == [0]*4).all(): move = random.choice(self.moves) 
-                    #intense need of down move, prob=.25
-                    else:move = random.choice([0,2,0,0,2,3,3,0,2,1]) 
-                    # when game stuck, down move prob = 0.1
-                    if move == 1: n_m = True
-                    
+                    move = random.choice(range(4))
                 history_c=history_c[1:] + [self.l1.copy()]
                 if all([(i==j).all() for i in history_c for j in history_c]): tempranmove = True
             self.l1 = next_play(self.l1.copy(), move)
@@ -87,8 +78,12 @@ if __name__ == '__main__':
     else: mode, AI_level = int(argv[1]), int(argv[2])
     
     if mode: print(strings.s4)
-    l1 = np.asarray([0 for i in range(16)])
-    l1 = fillnums(fillnums(l1)).reshape(4,4)
+    l1 = np.zeros((4,4), dtype = np.int64)
+    n1 = random.choice(range(16))
+    seq = list(range(16)); seq.pop(n1);
+    n2 = random.choice(seq)
+    l1[n1//4][n1%4] = 2 if random.random() < 0.9 else 4
+    l1[n2//4][n2%4] = 2 if random.random() < 0.9 else 4
     f = twnty48(l1)
     if mode: f.prettyprint(0, l1)
     f.run(AI_level, mode = mode)
