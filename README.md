@@ -6,7 +6,7 @@ Install by this command:
 
     $ pip3 install -r requirements.txt
 
-Game uses cpython for speedups.
+Game uses cython for speedups.
 
 Setups:
 
