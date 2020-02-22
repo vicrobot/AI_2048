@@ -4,6 +4,10 @@
 #include<cstdio>
 #include<cmath>
 
+
+/* TO DO NEXT: fillnum_m is iterating over whole grid each time for getting vacant spaces' indices,
+   try getting vacant indices after motion like l r u d and return a vector <int> type additional with them.
+*/
 using namespace std;
 class myvec{
     public:
@@ -15,7 +19,7 @@ class myvec{
     public:
         vector <vector<int> > left(vector<vector<int> > vect){
         vector <vector<int> > result;
-        int j;
+        int j,s;
         for(j =0; j< 4; j++){
             vector <int> res;
             int merged = 0;
@@ -23,7 +27,7 @@ class myvec{
             for(i =3; i>=0; i--){
                 int t = vect[j][i];
                 if(t==0){continue;}
-                int s = res.size();
+                s = res.size();
                 if(s > 0 and t == res[s-1] and merged == 0){
                     res[s-1] += t;
                     merged = 1;
@@ -35,7 +39,7 @@ class myvec{
                      res.push_back(t);
                     }
                 }
-            int s = res.size();
+            s = res.size();
             vector <int> pes(s, 0);
             for(int p=0;p<s;p++){
             pes[p] = res[s-p-1];
@@ -50,7 +54,7 @@ class myvec{
     public:
         vector <vector<int> > right(vector<vector<int> > vect){
         vector <vector<int> > result;
-        int j;
+        int j,s;
         for(j =0; j< 4; j++){
             vector <int> res;
             int merged = 0;
@@ -58,7 +62,7 @@ class myvec{
             for(i =0; i<4; i++){
                 int t = vect[j][i];
                 if(t==0){continue;}
-                int s = res.size();
+                s = res.size();
                 if(s > 0 and t == res[s-1] and merged == 0){
                     res[s-1] += t;
                     merged = 1;
@@ -70,7 +74,7 @@ class myvec{
                      res.push_back(t);
                     }
                 }
-            int s = res.size();
+            s = res.size();
             vector <int> pes(4,0);
             int count = 3;
             for(int p = s-1; p>=0;p--){
@@ -86,11 +90,11 @@ class myvec{
         vector <int> result;
             vector <int> res;
             int merged = 0;
-            int i;
+            int i,s;
             for(i =3; i>=0; i--){
                 int t = vect[i];
                 if(t==0){continue;}
-                int s = res.size();
+                s = res.size();
                 if(s > 0 and t == res[s-1] and merged == 0){
                     res[s-1] += t;
                     merged = 1;
@@ -102,7 +106,7 @@ class myvec{
                      res.push_back(t);
                     }
                 }
-            int s = res.size();
+            s = res.size();
             vector <int> pes(s, 0);
             for(int p=0;p<s;p++){
             pes[p] = res[s-p-1];
@@ -119,11 +123,11 @@ class myvec{
         vector <int > result;
             vector <int> res;
             int merged = 0;
-            int i;
+            int i,s;
             for(i =0; i<4; i++){
                 int t = vect[i];
                 if(t==0){continue;}
-                int s = res.size();
+                s = res.size();
                 if(s > 0 and t == res[s-1] and merged == 0){
                     res[s-1] += t;
                     merged = 1;
@@ -135,7 +139,7 @@ class myvec{
                      res.push_back(t);
                     }
                 }
-            int s = res.size();
+            s = res.size();
             vector <int> pes(4,0);
             int count = 3;
             for(int p = s-1; p>=0;p--){
@@ -180,10 +184,12 @@ class myvec{
         }
     public:
         vector <vector<int> > c(vector<vector<int> > vect, int move){
-        if(move == 0){ return up(vect);}
-        if(move == 1){ return down(vect);}
-        if(move == 2){ return left(vect);}
-        if(move == 3){ return right(vect);}
+        switch(move){
+            case 0: return up(vect);
+            case 1: return down(vect);
+            case 2: return left(vect);
+            case 3: return right(vect);
+        }
         }
     public:
         int isvalid(vector<vector<int> > vect){
@@ -226,7 +232,7 @@ class myvec{
                 }
             }
             if(vect.size() == 0){ return vect;}
-            int m1  = random(0,99) < 90 ? 2:4;
+            int m1  = rand()%100 < 90 ? 2:4;
             int num = indx[random(0,indx.size()-1)];
             vect[(int)(num/4)][num%4] = m1;
             return vect;
@@ -240,6 +246,16 @@ class myvec{
                 }
             }
             return m;
+        }
+    public:
+        int maxim1(vector<vector<int> > vect, int past){
+            int s = 2*past;
+            for(int i = 0;i<4;i++){
+                for(int j=0;j<4;j++){
+                    if(vect[i][j] == s){return s;}
+                }
+            }
+            return past;
         }
     public:
         int hasMoved(vector<vector<int> > v1, vector<vector<int> > v2){
@@ -266,13 +282,15 @@ class myvec{
                 vector<vector<int> > vect2 = c(vect, first_move);
                 for(int p=0; p<times; p++){
                     vect1 = fillnum_m(vect2);
+                    int past = maxim(vect1); // cache of max in vect1
                     while(isvalid(vect1)==1){
-                        vect1 = next_play(vect1, random(0,3));
+                        vect1 = next_play(vect1, rand()%4); // played next 
                         if(moved_temp==0){
                             moved_temp = 1;
                             continue;
                         }
-                        score += maxim(vect1);
+                        past = maxim1(vect1, past);// give maxim1 changed vect and past max
+                        score += past;
                     }
                 }
                 return score/times;
