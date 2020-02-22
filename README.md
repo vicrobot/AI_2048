@@ -13,6 +13,7 @@ Setups:
 **On Linux**
 
     $ python setup.py build_ext --inplace &>/dev/null
+or see [this](https://www.youtube.com/watch?v=SB9UgjJFFUk) video for linux.
 
 **On Windows**
 
