@@ -3,6 +3,7 @@
 #include<cstdlib>
 #include<cstdio>
 #include<cmath>
+//#include<thread>
 
 
 /* TO DO NEXT: fillnum_m is iterating over whole grid each time for getting vacant spaces' indices,
@@ -87,14 +88,13 @@ class myvec{
         }
     public:
         vector <int> l(vector<int> vect){
-        vector <int> result;
             vector <int> res;
             int merged = 0;
-            int i,s;
+            int i,s=-1,t;
             for(i =3; i>=0; i--){
-                int t = vect[i];
+                t = vect[i];
                 if(t==0){continue;}
-                s = res.size();
+                else{s++;}
                 if(s > 0 and t == res[s-1] and merged == 0){
                     res[s-1] += t;
                     merged = 1;
@@ -114,20 +114,18 @@ class myvec{
             for(int p = 0; p < 4 - s; p++){
             pes.push_back(0);
             }
-            result = pes;  
             
-            return result;
+            return pes;
         }
     public:
         vector <int > r(vector<int > vect){
-        vector <int > result;
             vector <int> res;
             int merged = 0;
-            int i,s;
+            int i,s=-1,t;
             for(i =0; i<4; i++){
-                int t = vect[i];
+                t = vect[i];
                 if(t==0){continue;}
-                s = res.size();
+                else{s++;}
                 if(s > 0 and t == res[s-1] and merged == 0){
                     res[s-1] += t;
                     merged = 1;
@@ -145,10 +143,8 @@ class myvec{
             for(int p = s-1; p>=0;p--){
                 pes[count] = res[p];count -= 1;
             }
-            result = pes;
             
-            
-            return result;
+            return pes;
         }
     public:
         vector <vector<int> > up(vector<vector<int> > vect){
