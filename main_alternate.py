@@ -68,29 +68,29 @@ class Board:
     def vect_sum_left(self, a,b,c,d):
         # 2048 alike left slide
         # currently for 4 grid edge
-        #changed=0
+        changed=0
         if a == 0:
             if b == 0:
                 if c == 0:
                     if d == 0:
-                        return a,b,c,d #, changed # didn't change
+                        return a,b,c,d, changed # didn't change
                     else:
                         # case: d is non-zero
-                        #changed = 1
-                        return d,0,0,0 #, changed # changed
+                        changed = 1
+                        return d,0,0,0, changed # changed
                 else:
                     # case: c is non-zero, doesn't matter d is or not
-                    #changed = 1
+                    changed = 1
                     a,b,c,d = c,d,0,0 # a is 0, c isn't, changed.
             else:
                 # case: b is non-zero
                 if c == 0:
                     # case: b is non-zero and c is zero, d doesn't matter as below is to be returned
-                    #changed = 1
+                    changed = 1
                     a,b,c,d = b,d,0,0 # changed
                 else:
                     # b and c matter, d doesn't
-                    #changed = 1 #as b nonzero switched a
+                    changed = 1 #as b nonzero switched a
                     a,b,c,d = b,c,d,0
         else:
             if b == 0:
@@ -99,17 +99,17 @@ class Board:
                         return a,b,c,d #didn't change
                     else:
                         # case: d is non-zero
-                        #changed = 1
+                        changed = 1
                         a,b,c,d= a,d,0,0 #changed as b 0 was replaced with d non-zero
                 else:
                     # case: c is non-zero, doesn't matter d is or not
-                    #changed= 1
+                    changed= 1
                     a,b,c,d = a,c,d,0 #changed
             else:
                 # case: b is non-zero
                 if c == 0:
                     # case: b is non-zero and c is zero, d doesn't matter as below is to be returned
-                    #changed = 1 if d else 0
+                    changed = 1 if d else 0
                     a,b,c,d = a,b,d,0
                 else:
                     # b and c matter, d doesn't
@@ -117,59 +117,59 @@ class Board:
                     pass #didn't changed
         
         if b-a == 0:
-            if d-c == 0: return b+a,c+d,0,0 #, changed if not b and not d else 1
-            return b+a,c,d,0 #, changed if not b else 1
+            if d-c == 0: return b+a,c+d,0,0 , changed if not b and not d else 1
+            return b+a,c,d,0 , changed if not b else 1
         elif c-b == 0:
-            return a, b+c, d, 0 #, changed if not c else 1
+            return a, b+c, d, 0 , changed if not c else 1
         elif d-c == 0:
-            return a,b,c+d,0 #, changed if not d else 1
+            return a,b,c+d,0 , changed if not d else 1
         else:
-            return a,b,c,d #, changed
+            return a,b,c,d , changed
             
             
     def vect_sum_right(self, a,b,c,d):
         # 2048 alike left slide
         # currently for 4 grid edge
-        #changed = 0  # removed this idea of detecting change from pov of changer as its increasing time complexity
+        changed = 0  
         if d == 0:
             if c == 0:
                 if b == 0:
                     if a == 0:
-                        return a,b,c,d #, changed #not changed
+                        return a,b,c,d , changed #not changed
                     else:
                         # case: a is non-zero
                         #changed = 1
-                        return 0,0,0,a #, changed
+                        return 0,0,0,a , changed
                 else:
                     # case: b is non-zero, a doesn't matter
-                    #changed = 1
+                    changed = 1
                     a,b,c,d = 0,0,a,b
             else:
                 if b == 0:
                     # case: c is non-zero, b is zero
-                    #changed = 1
+                    changed = 1
                     a,b,c,d = 0,0,a,c
                 else:
                     # case: c and b are non-zero
-                    #changed = 1
+                    changed = 1
                     a,b,c,d = 0,a,b,c
         else:
             if c == 0:
                 if b == 0:
                     if a == 0:
-                        return a,b,c,d #, changed
+                        return a,b,c,d , changed
                     else:
                         # case: a is non-zero
-                        #changed = 1
+                        changed = 1
                         a,b,c,d= 0,0,a,d
                 else:
                     # case: b is non-zero, a doesn't matter
-                    #changed = 1 #since b nonzero took place of c zero
+                    changed = 1 #since b nonzero took place of c zero
                     a,b,c,d = 0,a,b,d
             else:
                 if b == 0:
                     # case: c is non-zero, b is zero
-                    #changed = 1 if a else 0
+                    changed = 1 if a else 0
                     a,b,c,d = 0,a,c,d
                 else:
                     # case: c and b are non-zero
@@ -178,14 +178,14 @@ class Board:
         
         if d-c == 0:
             if a-b == 0:
-                return 0,0,a+b,c+d #, changed if not d and not a else 1
-            return 0,a,b,c+d #, changed if not d else 1
+                return 0,0,a+b,c+d , changed if not d and not a else 1
+            return 0,a,b,c+d , changed if not d else 1
         elif c-b == 0:
-            return 0,a,c+b,d # , changed if not c else 1
+            return 0,a,c+b,d  , changed if not c else 1
         elif b-a==0:
-            return 0,a+b,c,d #, changed if not b else 1
+            return 0,a+b,c,d , changed if not b else 1
         else:
-            return a,b,c,d #, changed
+            return a,b,c,d , changed
 
     
     def mahimafalam(self, disha, inplace=True, grid_external=None, return_copy=False): #vidit, apekshit
@@ -201,29 +201,39 @@ class Board:
             grid = grid.copy() #preventing overwrite
         
         # TODO: one heavy operation right now is transposing 2 times per up or down.
-        #global_changed = 0
+        global_changed = 0
         if disha == 0:
             #breakpoint()
             grid = grid.T # for up/down, make T then left/right then T
             for row_num in range(4):
-                grid[row_num]=self.vect_sum_left(*grid[row_num])
+                #grid[row_num]=self.vect_sum_left(*grid[row_num])
+                *grid[row_num],changed=self.vect_sum_left(*grid[row_num])
+                if changed: global_changed =1
+                
             grid = grid.T
         elif disha == 1:
             grid = grid.T
             for row_num in range(4):
-                grid[row_num]=self.vect_sum_right(*grid[row_num])
+                #grid[row_num]=self.vect_sum_right(*grid[row_num])
+                *grid[row_num],changed=self.vect_sum_right(*grid[row_num])
+                if changed: global_changed =1
             grid = grid.T
         elif disha == 2:
             for row_num in range(4):
-                grid[row_num]=self.vect_sum_left(*grid[row_num])
+                #grid[row_num]=self.vect_sum_left(*grid[row_num])
+                *grid[row_num],changed=self.vect_sum_left(*grid[row_num])
+                if changed: global_changed =1
             
         elif disha == 3:
             for row_num in range(4):
-                grid[row_num]=self.vect_sum_right(*grid[row_num])
+                #grid[row_num]=self.vect_sum_right(*grid[row_num])
+                *grid[row_num],changed=self.vect_sum_right(*grid[row_num])
+                if changed: global_changed =1
         else:
             print('wrong move') #can log also, or can ignore, or can raise exception if this is not user sided
         
-        if return_copy or not inplace: return grid.copy()
+        if return_copy or not inplace: return grid.copy(),global_changed
+        return global_changed
     
     def animafalam(self,inplace=True,grid_external=None,return_copy=False): #agyaat
         # 2 if rand() < 0.9 else 4 in random position.
@@ -245,11 +255,12 @@ class Board:
     
         # use mahimafalam, then animafalam.
         # TODO: Maybe we can create a pre-filter, to decide if a grid can move a move or will stay same.
-        grid_unworked = self.grid.copy() if grid_external is None else grid_external
-        grid_mahimafalit = self.mahimafalam(disha,inplace=inplace,grid_external=grid_external,return_copy=True)
-        if np.array_equal(grid_unworked, grid_mahimafalit):
+        #grid_unworked = self.grid.copy() if grid_external is None else grid_external
+        grid_mahimafalit,changed = self.mahimafalam(disha,inplace=inplace,grid_external=grid_external,return_copy=True)
+        #if np.array_equal(grid_unworked, grid_mahimafalit):
+        if changed:
             #no karma, no fal
-            return grid_unworked
+            return grid_mahimafalit
         else:
             self.animafalam(inplace=inplace,grid_external=grid_mahimafalit)
             if grid_external is None:

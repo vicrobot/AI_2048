@@ -24,7 +24,7 @@ class MainAlternateTestCases(TestCase):
             print(f'Inplace={repr(inplace)}')
             print(newline)
             grid_scene = core_grid.copy()
-            grid_mahimafalit = board_instance.mahimafalam(move_code, grid_external=grid_scene,inplace=inplace,return_copy=True) #vaam
+            grid_mahimafalit,changed = board_instance.mahimafalam(move_code, grid_external=grid_scene,inplace=inplace,return_copy=True) #vaam
             print('Grid input:', grid_scene, 'Grid output', grid_mahimafalit, sep = '\n'*2)
             print('-'*20)
         
@@ -45,7 +45,7 @@ class MainAlternateTestCases(TestCase):
         K = 1_000_000
         grid_scene=core_grid.copy()
         for i in range(K):
-            grid_mahimafalit = board_instance.mahimafalam(
+            grid_mahimafalit,changed = board_instance.mahimafalam(
                             random.choice(range(4)), inplace=False,grid_external=grid_scene,return_copy=True)
         exit_time = time.time()
         
@@ -70,14 +70,15 @@ class MainAlternateTestCases(TestCase):
         
         for vect in arr:
             row = [0,0,0,0]
-            row[0],row[1],row[2],row[3]= board_instance.vect_sum_left(*vect)
-            print(f'Vect {vect} summed left as {row}')
+            *row,changed= board_instance.vect_sum_left(*vect)
+            print(f'Vect {vect} summed left as {row} and vect is {"not " if not changed else ""}changed')
 
         print(newline)
         for vect in arr:
             row = [0,0,0,0]
-            row[0],row[1],row[2],row[3]= board_instance.vect_sum_right(*vect)
-            print(f'Vect {vect} summed right as {row}')
+            *row, changed= board_instance.vect_sum_right(*vect)
+            print(f'Vect {vect} summed right as {row} and vect is {"not " if not changed else ""}changed')
+
         print('-'*20)
 
 
