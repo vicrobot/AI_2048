@@ -40,11 +40,26 @@ But, but, but... This is without assuming overheads like score eval, alpha beta 
 """
 ###
 
+def empty_trail_root(a,b,c,d):
+    # supposing left to right growth happens.
+    # supposing array has nonzeros, zeros sort from root to leaves.
+    if d:
+        return 4 # out of bound, indicating it doesn't make sense
+    elif c:
+        return 3
+    elif b:
+        return 2
+    elif a:
+        return 1
+    else:
+        return 0
+
+newline = '\n'           
 
 #########+==================
 
 class Board:
-    #Time taken for 100000 moves: 2.83758s (karma)
+    #Time taken for 1000000 moves: 16.4565s
     def __init__(self):
         # config_fetch
         self.grid_size = config.grid_size
@@ -92,7 +107,7 @@ class Board:
             if b == 0:
                 if c == 0:
                     if d == 0:
-                        return a,b,c,d,changed #didn't change
+                        return a,b,c,d,changed,  #didn't change
                     else:
                         # case: d is non-zero
                         changed = 1
@@ -113,7 +128,8 @@ class Board:
                     pass #didn't changed
         
         if b-a == 0:
-            if d-c == 0: return b+a,c+d,0,0 , changed if not b and not d else 1
+            if d-c == 0: 
+                return b+a,c+d,0,0 , changed if not b and not d else 1
             return b+a,c,d,0 , changed if not b else 1
         elif c-b == 0:
             return a, b+c, d, 0 , changed if not c else 1
@@ -319,7 +335,7 @@ class Board:
 
         if not inplace:
             grid = grid.copy() #preventing overwrite
-
+        empty_idxs = []
         global_changed = 0
         if disha == 0:
             # nabh
@@ -327,10 +343,64 @@ class Board:
             for col_num in range(4):
                 #grid[row_num]=self.vect_sum_left(*grid[row_num])
                 if not global_changed:
-                    *grid[:,col_num],changed=self.vect_sum_left(*grid[:,col_num])
+                    #*grid[:,col_num],changed=self.vect_sum_left(*grid[:,col_num])
+                    #global_changed = global_changed or changed
+                    a,b,c,d,changed=self.vect_sum_left(*grid[:,col_num])
+                    #print(f'a,b,c,d are {a,b,c,d} and the input value before up shift were {grid[:,col_num]}')
+                    grid[:,col_num]=a,b,c,d
                     global_changed = global_changed or changed
+                    if d:
+                        pass
+                    elif c:
+                        # d is 0
+                        # math for columns work like:
+                        # it will be like row cases, cuz its data loss as the element index in row cases is col num
+                        # thus, say idx 9, so 9//4 is row num which is elem idx = 2, and 9%4 is col num ie 1
+                        # thus col_num + elem_idx*4 will give flatten idx map
+                        empty_idxs.append(col_num + 12)
+                    elif b:
+                        # d and c are 0
+                        empty_idxs.append(col_num + 12)
+                        empty_idxs.append(col_num + 8)
+                    elif a:
+                        # d=c=b = 0
+                        empty_idxs.append(col_num + 12)
+                        empty_idxs.append(col_num+8)
+                        empty_idxs.append(col_num+4)
+                    else:
+                        # a=b=c=d=0
+                        empty_idxs.append(col_num)
+                        empty_idxs.append(col_num+4)
+                        empty_idxs.append(col_num+8)
+                        empty_idxs.append(col_num+12)
+                    
                 else:
-                    grid[:,col_num]=self.vect_sum_left_simpler(*grid[:,col_num])
+                    a,b,c,d=self.vect_sum_left_simpler(*grid[:,col_num])
+                    grid[:,col_num] = a,b,c,d
+                    if d:
+                        pass
+                    elif c:
+                        # d is 0
+                        # math for columns work like:
+                        # it will be like row cases, cuz its data loss as the element index in row cases is col num
+                        # thus, say idx 9, so 9//4 is row num which is elem idx = 2, and 9%4 is col num ie 1
+                        # thus col_num + elem_idx*4 will give flatten idx map
+                        empty_idxs.append(col_num + 12)
+                    elif b:
+                        # d and c are 0
+                        empty_idxs.append(col_num + 12)
+                        empty_idxs.append(col_num + 8)
+                    elif a:
+                        # d=c=b = 0
+                        empty_idxs.append(col_num + 12)
+                        empty_idxs.append(col_num+8)
+                        empty_idxs.append(col_num+4)
+                    else:
+                        # a=b=c=d=0
+                        empty_idxs.append(col_num)
+                        empty_idxs.append(col_num+4)
+                        empty_idxs.append(col_num+8)
+                        empty_idxs.append(col_num+12)
                     
             #grid = grid.T
         elif disha == 1:
@@ -339,37 +409,182 @@ class Board:
             for col_num in range(4):
                 #grid[row_num]=self.vect_sum_right(*grid[row_num])
                 if not global_changed:
-                    *grid[:,col_num],changed=self.vect_sum_right(*grid[:,col_num])
+                    a,b,c,d,changed=self.vect_sum_right(*grid[:,col_num])
+                    grid[:,col_num]=a,b,c,d
                     global_changed = global_changed or changed
+                    if a:
+                        pass
+                    elif b:
+                        # a is 0
+                        # math for columns work like:
+                        # it will be like row cases, cuz its data loss as the element index in row cases is col num
+                        # thus, say idx 9, so 9//4 is row num which is elem idx = 2, and 9%4 is col num ie 1
+                        # thus col_num + elem_idx*4 will give flatten idx map
+                        empty_idxs.append(col_num) # col_num + 4*0 = col_num
+                    elif c:
+                        # a and b are 0
+                        empty_idxs.append(col_num)
+                        empty_idxs.append(col_num + 4)
+                    elif d:
+                        # a=b=c = 0
+                        empty_idxs.append(col_num)
+                        empty_idxs.append(col_num+4)
+                        empty_idxs.append(col_num+8)
+                    else:
+                        # a=b=c=d=0
+                        empty_idxs.append(col_num)
+                        empty_idxs.append(col_num+4)
+                        empty_idxs.append(col_num+8)
+                        empty_idxs.append(col_num+12)
                 else:
-                    grid[:,col_num]=self.vect_sum_right_simpler(*grid[:,col_num])
+                    a,b,c,d=self.vect_sum_right_simpler(*grid[:,col_num])
+                    grid[:,col_num] = a,b,c,d
+                    if a:
+                        pass
+                    elif b:
+                        # a is 0
+                        # math for columns work like:
+                        # it will be like row cases, cuz its data loss as the element index in row cases is col num
+                        # thus, say idx 9, so 9//4 is row num which is elem idx = 2, and 9%4 is col num ie 1
+                        # thus col_num + elem_idx*4 will give flatten idx map
+                        empty_idxs.append(col_num) # col_num + 4*0 = col_num
+                    elif c:
+                        # a and b are 0
+                        empty_idxs.append(col_num)
+                        empty_idxs.append(col_num + 4)
+                    elif d:
+                        # a=b=c = 0
+                        empty_idxs.append(col_num)
+                        empty_idxs.append(col_num+4)
+                        empty_idxs.append(col_num+8)
+                    else:
+                        # a=b=c=d=0
+                        empty_idxs.append(col_num)
+                        empty_idxs.append(col_num+4)
+                        empty_idxs.append(col_num+8)
+                        empty_idxs.append(col_num+12)
+                    
             #grid = grid.T
         elif disha == 2:
             # vaam
             for row_num in range(4):
+                x_4 = row_num*4
                 #grid[row_num]=self.vect_sum_left(*grid[row_num])
                 if not global_changed:
-                    *grid[row_num],changed=self.vect_sum_left(*grid[row_num])
+                    #*grid[row_num],changed=self.vect_sum_left(*grid[row_num])
+                    #global_changed = global_changed or changed
+                    a,b,c,d,changed=self.vect_sum_left(*grid[row_num])
+                    global_changed = global_changed or changed
+                    
+                    if d:
+                        pass
+                    elif c:
+                        # d is 0, others not. We're in hunt of empty places(not change detection),
+                        # they surely occur in trails after shifting
+                        # 0 to 15 numbers are x//4, x%4 as x,y example: 3: 3//4=0th row, 3%4=3 idx ie 4th elem
+                        # example 2: 9//4 = 2, 9%4 = 1, therefore (2+1=3)rd row, 2nd elem
+                        # to map backwards: (row_num)*4 + (elem idx )
+                        # example, row_num=0, for d, the number is 0*4 + 3 = 3
+                        empty_idxs.append(x_4 + 3)
+                    elif b:
+                        empty_idxs.append(x_4 + 3)
+                        empty_idxs.append(x_4 + 2)
+                    elif a:
+                        empty_idxs.append(x_4 + 3)
+                        empty_idxs.append(x_4 + 2)
+                        empty_idxs.append(x_4 + 1)
+                    else:
+                        empty_idxs.append(x_4 + 3)
+                        empty_idxs.append(x_4 + 2)
+                        empty_idxs.append(x_4 + 1)
+                        empty_idxs.append(x_4 + 0)
+                    grid[row_num]=a,b,c,d
                     global_changed = global_changed or changed
                 else:
-                    grid[row_num]=self.vect_sum_left_simpler(*grid[row_num])
+                    a,b,c,d=self.vect_sum_left_simpler(*grid[row_num])
+                    if d:
+                        pass
+                    elif c:
+                        # d is 0, others not. We're in hunt of empty places(not change detection),
+                        # they surely occur in trails after shifting
+                        # 0 to 15 numbers are x//4, x%4 as x,y example: 3: 3//4=0th row, 3%4=3 idx ie 4th elem
+                        # example 2: 9//4 = 2, 9%4 = 1, therefore (2+1=3)rd row, 2nd elem
+                        # to map backwards: (row_num)*4 + (elem idx )
+                        # example, row_num=0, for d, the number is 0*4 + 3 = 3
+                        empty_idxs.append(x_4 + 3)
+                    elif b:
+                        empty_idxs.append(x_4 + 3)
+                        empty_idxs.append(x_4 + 2)
+                    elif a:
+                        empty_idxs.append(x_4 + 3)
+                        empty_idxs.append(x_4 + 2)
+                        empty_idxs.append(x_4 + 1)
+                    else:
+                        empty_idxs.append(x_4 + 3)
+                        empty_idxs.append(x_4 + 2)
+                        empty_idxs.append(x_4 + 1)
+                        empty_idxs.append(x_4 + 0)
+                    grid[row_num]=a,b,c,d
                     
         elif disha == 3:
             # agra
             for row_num in range(4):
+                x_4 = row_num * 4
                 #grid[row_num]=self.vect_sum_right(*grid[row_num])
                 if not global_changed:
-                    *grid[row_num],changed=self.vect_sum_right(*grid[row_num])
+                    a,b,c,d,changed=self.vect_sum_right(*grid[row_num])
+                    if a:
+                        pass
+                    elif b:
+                        # a is 0
+                        empty_idxs.append(x_4 + 0)
+                    elif c:
+                        # a and b are 0
+                        empty_idxs.append(x_4 + 0)
+                        empty_idxs.append(x_4 + 1)
+                    elif d:
+                        # a=b=c = 0
+                        empty_idxs.append(x_4 + 0)
+                        empty_idxs.append(x_4 + 1)
+                        empty_idxs.append(x_4 + 2)
+                    else:
+                        # a=b=c=d=0
+                        empty_idxs.append(x_4 + 3)
+                        empty_idxs.append(x_4 + 2)
+                        empty_idxs.append(x_4 + 1)
+                        empty_idxs.append(x_4 + 0)
+                    grid[row_num]=a,b,c,d
                     global_changed = global_changed or changed
                 else:
-                    grid[row_num]=self.vect_sum_right_simpler(*grid[row_num])
+                    a,b,c,d=self.vect_sum_right_simpler(*grid[row_num])
+                    if a:
+                        pass
+                    elif b:
+                        # a is 0
+                        empty_idxs.append(x_4 + 0)
+                    elif c:
+                        # a and b are 0
+                        empty_idxs.append(x_4 + 0)
+                        empty_idxs.append(x_4 + 1)
+                    elif d:
+                        # a=b=c = 0
+                        empty_idxs.append(x_4 + 0)
+                        empty_idxs.append(x_4 + 1)
+                        empty_idxs.append(x_4 + 2)
+                    else:
+                        # a=b=c=d=0
+                        empty_idxs.append(x_4 + 3)
+                        empty_idxs.append(x_4 + 2)
+                        empty_idxs.append(x_4 + 1)
+                        empty_idxs.append(x_4 + 0)
+                    grid[row_num]=a,b,c,d
         else:
             print('wrong move') #can log also, or can ignore, or can raise exception if this is not user sided
         
-        if return_copy or not inplace: return grid.copy(),global_changed
-        return global_changed
+        if return_copy or not inplace: return grid.copy(),global_changed,empty_idxs
+        return global_changed,empty_idxs
     
-    def animafalam(self,inplace=True,grid_external=None,return_copy=False): #agyaat
+    def animafalam(self,inplace=True,grid_external=None,return_copy=False,empty_idxs=None): #agyaat
         # 2 if rand() < 0.9 else 4 in random position.
         if grid_external is not None:
             grid = grid_external
@@ -379,7 +594,14 @@ class Board:
         if not inplace:
             grid = grid.copy() #preventing overwrite
         
-        x,y = random.choice(np.argwhere(grid==0))
+        if empty_idxs is None:
+            x,y = random.choice(np.argwhere(grid==0))
+        else:
+            try:
+                idx = random.choice(empty_idxs)
+            except:
+                breakpoint()
+            x,y = idx//4, idx%4
         random_val = 2 if random.random() < self.twos_chances else 4
         grid[x][y] = random_val
         
@@ -390,13 +612,14 @@ class Board:
         # use mahimafalam, then animafalam.
         # TODO: Maybe we can create a pre-filter, to decide if a grid can move a move or will stay same.
         #grid_unworked = self.grid.copy() if grid_external is None else grid_external
-        grid_mahimafalit,changed = self.mahimafalam(disha,inplace=inplace,grid_external=grid_external,return_copy=True)
+        #breakpoint()
+        grid_mahimafalit,changed,empty_idxs = self.mahimafalam(disha,inplace=inplace,grid_external=grid_external,return_copy=True)
         #if np.array_equal(grid_unworked, grid_mahimafalit):
         if not changed:
             #no karma, no fal
             return grid_mahimafalit,changed
         else:
-            self.animafalam(inplace=inplace,grid_external=grid_mahimafalit)
+            self.animafalam(inplace=inplace,grid_external=grid_mahimafalit,empty_idxs=empty_idxs)
             if grid_external is None:
                 self.grid = grid_mahimafalit # if inplace=True, then it's modified inplace so its grid_karmafalit
             return grid_mahimafalit,changed
@@ -472,7 +695,7 @@ def get_move(grid):
     
     return random.choice(range(4))
 
-"""
+
 if __name__ == '__main__':
     
     # mode 0: AI Autoplay, mode 1: human manual play
@@ -485,7 +708,7 @@ if __name__ == '__main__':
         board_instance = Board()
         #printing the initial grid()
         board_instance.prettyprint(0,board_instance.grid)
-        
+        move_map = dict(zip(range(4),['Up','Down','Left','Right']))
         keyobj = key.Key()
         steps_count = 0
         while isvalid(board_instance.grid):
@@ -498,6 +721,12 @@ if __name__ == '__main__':
             if steps_count == 0:
                 board_instance.time_start=time.time()
             board_instance.karma(move)
+            with open('boardlog.txt','a+') as boardlog:
+                boardlog.write(move_map[move])
+                boardlog.write(newline)
+                boardlog.write(board_instance.grid.__str__())
+                boardlog.write(newline*4)
+                
             board_instance.prettyprint(move,board_instance.grid)
             steps_count += 1
         print('\n'*10)
@@ -533,7 +762,7 @@ if __name__ == '__main__':
             print(strings.apocalypse_string)
 
 
-"""
+
 
 
 
