@@ -35,31 +35,18 @@ def rand_moves(data,first_move,times): #data is playing grid, numpy matrix 4 x 4
 
 This above is a snap from code review stack exchange; my post.
 For each available moves, it runs 100 times the full board till non-valid. Takes about 3.25 sec. per move. Gives 80% win rate.
-Since a board ends up at like 200 random moves, and since there are 4 available moves typically, and since 100 moves are run, so 80k karma is done per 3.2 sec at least. Current algo seems way powerful, doing 1lac per sec. Almost 4x powerful. 
+Since a board ends up at like 200 random moves, and since there are 4 available moves typically, and since 100 moves are run, so 80k karma is done per 3.2 sec at least. Current algo seems way powerful, doing 1lac per 1.6sec. Almost 2x powerful. 
 But, but, but... This is without assuming overheads like score eval, alpha beta minimax etc calcs.
 """
 ###
 
-def empty_trail_root(a,b,c,d):
-    # supposing left to right growth happens.
-    # supposing array has nonzeros, zeros sort from root to leaves.
-    if d:
-        return 4 # out of bound, indicating it doesn't make sense
-    elif c:
-        return 3
-    elif b:
-        return 2
-    elif a:
-        return 1
-    else:
-        return 0
-
-newline = '\n'           
+newline = '\n'     
+move_map = dict(zip(range(4),['Up','Down','Left','Right']))      
 
 #########+==================
 
 class Board:
-    #Time taken for 1000000 moves: 16.4565s
+    #Time taken for 1000000 moves (karma): 16.4565s
     def __init__(self):
         # config_fetch
         self.grid_size = config.grid_size
@@ -351,6 +338,7 @@ class Board:
                     global_changed = global_changed or changed
                     if d:
                         pass
+                        #don't remove this, otherwise it's visitors will visit else block
                     elif c:
                         # d is 0
                         # math for columns work like:
@@ -604,7 +592,6 @@ class Board:
             x,y = idx//4, idx%4
         random_val = 2 if random.random() < self.twos_chances else 4
         grid[x][y] = random_val
-        
         if return_copy or not inplace: return grid.copy()
         
     def karmafalam(self, disha,inplace=True,grid_external=None):
@@ -613,16 +600,21 @@ class Board:
         # TODO: Maybe we can create a pre-filter, to decide if a grid can move a move or will stay same.
         #grid_unworked = self.grid.copy() if grid_external is None else grid_external
         #breakpoint()
-        grid_mahimafalit,changed,empty_idxs = self.mahimafalam(disha,inplace=inplace,grid_external=grid_external,return_copy=True)
-        #if np.array_equal(grid_unworked, grid_mahimafalit):
-        if not changed:
-            #no karma, no fal
-            return grid_mahimafalit,changed
+        grid_mahimafalit,changed,empty_idxs = self.mahimafalam(
+                        disha,inplace=inplace,grid_external=grid_external,return_copy=True)
+        
+
+        if inplace:
+            if changed:
+                self.animafalam(inplace=inplace,grid_external=grid_external,empty_idxs=empty_idxs)
+            return changed
         else:
-            self.animafalam(inplace=inplace,grid_external=grid_mahimafalit,empty_idxs=empty_idxs)
-            if grid_external is None:
-                self.grid = grid_mahimafalit # if inplace=True, then it's modified inplace so its grid_karmafalit
-            return grid_mahimafalit,changed
+            if changed:
+                grid_karmafalit = self.animafalam(
+                            inplace=inplace,grid_external=grid_mahimafalit,empty_idxs=empty_idxs)
+                return grid_karmafalit, changed
+            else:
+                return grid_mahimafalit, changed
     
     def karma(self, disha,inplace=True,grid_external=None):
         # if no grid given, obj's grid is worked upon.
@@ -643,21 +635,7 @@ class Board:
         for i in range(2*len(grid) + 1):
             print("\033[F",end='', flush=True)
 
-"""
-class Test:
-    def __init__(self,*args,**kwargs):pass
-    
-    def foo(vect):
-        return vect ** 2
-    
-    sq = np.vectorize(foo)
-    
-    def var(self,grid):
-        print(self.sq(grid))
-    
-Test().var(np.asarray([[1,2],[3,4]]))
-exit()
-"""
+
 
 # the above board now holds a grid, can talk with player and his karmafal assigned by nature on the board.
 
@@ -687,16 +665,101 @@ def argv_parser():
 
 
 
-def score(grid):
-    maxv = grid.max()
-
-def get_move(grid):
-    #time.sleep(random.choice([0.3,0.4,0.5,0.6]))
+def grid_score(grid):
     
-    return random.choice(range(4))
+    # some ideas
+    # 1. Weight to have big numbers over their splits.
+    # 2. Weight to have more space
+    # 3. Weight to have least similar numbers
+    # 4. Use bootstrap, or as I say, use layer by layer from manual score to AI to manual score to AI scoring.
 
+    flattened = grid.flatten()
+    sorted_flatten = sorted(flattened)
+    score = 0
+    for num in sorted_flatten:
+        score += 2**num
+    score += 2*(len(np.argwhere(grid == 0)))
+    return score
+
+
+def get_move(grid,N=3):
+    #breakpoint()
+    #time.sleep(random.choice([0.3,0.4,0.5,0.6]))
+    board_instance = Board()
+    score_move_map = {0:0,1:0,2:0,3:0}
+    
+    max_score = 0
+    best_move = 0
+    
+    for move in range(4):
+        # for each move,
+        # generate one time mahimafalam with that move,
+        # for N times, do animafalam, then live life, add score
+        # final score for that move is score / N
+        
+        # copy the core grid before altering for virtuality. Copy per move.
+        grid_c = grid.copy()
+        
+        # biased karma for that move.
+        board_instance.karma(move, grid_external=grid_c)
+       
+        score=0
+        for _ in range(N):
+            # till death plays. N life
+            
+            #copy the core grid (core relative to the move with having mahimafalam). Copy per life
+            grid_cc = grid_c.copy()
+            
+            # count to count the changes in the considered _th life
+            count = 1
+            # loop till death
+            while isvalid(grid_cc):
+                move_random=random.choice(range(4)) #TODO: A suboptimal score algo can work here
+                board_instance.karma(move_random, grid_external=grid_cc)
+                count += 1
+            score += grid_score(grid_cc) # adding all lives' wealth collections
+        score /= N # average wealth collection
+        if score > max_score:
+            best_move = move
+            max_score=score
+    return best_move
+        
+    
+
+
+####
+"""
+
+A grid is there.
+It needs to be labeled movable or not.
+It's available dishaein needs to be evaluated.
+It's children needs to be produced.
+
+
+Full children is different than rest.
+This is one of those scenarios where stupidity of computer exponentially increases because of lack of soul.
+The computers can't integrate the raising work and it just cannot treat them as community, it treats them individuals.
+
+
+
+For animafalam, just populate one by one all empty idxs.
+For mahimafalam, manually I will have to write community program for all disha being used case.
+In this, we can reduce the times vector is evaluated from 4 to few.
+
+
+"""
+####
+
+def boardlog(logpath, grid_str):
+    with open(logpath,'a+') as fileobj:
+        fileobj.write(move_map[move])
+        fileobj.write(newline)
+        fileobj.write(board_instance.grid.__str__())
+        fileobj.write(newline*4)
 
 if __name__ == '__main__':
+    
+    from datetime import datetime
     
     # mode 0: AI Autoplay, mode 1: human manual play
     mode, AI_level = argv_parser()
@@ -708,7 +771,14 @@ if __name__ == '__main__':
         board_instance = Board()
         #printing the initial grid()
         board_instance.prettyprint(0,board_instance.grid)
-        move_map = dict(zip(range(4),['Up','Down','Left','Right']))
+        
+        #logpath
+        #TODO: Can we use logger for it, a side logger obj for this specific?
+        boardlogpath=f'boardlog/manual/boardlog{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
+        
+        #log initial state:
+        boardlog(board_instance.grid.__str__())
+        
         keyobj = key.Key()
         steps_count = 0
         while isvalid(board_instance.grid):
@@ -721,11 +791,8 @@ if __name__ == '__main__':
             if steps_count == 0:
                 board_instance.time_start=time.time()
             board_instance.karma(move)
-            with open('boardlog.txt','a+') as boardlog:
-                boardlog.write(move_map[move])
-                boardlog.write(newline)
-                boardlog.write(board_instance.grid.__str__())
-                boardlog.write(newline*4)
+            #log the board
+            boardlog(boardlogpath,board_instance.grid.__str__())
                 
             board_instance.prettyprint(move,board_instance.grid)
             steps_count += 1
@@ -742,15 +809,20 @@ if __name__ == '__main__':
         board_instance = Board()
         #printing the initial grid()
         board_instance.prettyprint(0,board_instance.grid)
+        #logpath
+        boardlogpath = f'boardlog/ai/boardlog{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
+        #log initial state:
+        boardlog(board_instance.grid.__str__())
         
         steps_count = 0
         while isvalid(board_instance.grid):
-        
-            move = get_move(board_instance.grid)
+            move = get_move(board_instance.grid,N=AI_level)
             
             if steps_count == 0:
                 board_instance.time_start=time.time()
             board_instance.karma(move)
+            #log the board
+            boardlog(board_instance.grid.__str__())
             board_instance.prettyprint(move,board_instance.grid)
             steps_count += 1
         print('\n'*10)
@@ -770,6 +842,13 @@ if __name__ == '__main__':
 
 """
 Bugs
+
+
+
+
+Something happened.
+Board is moving but not dying, somehow getting young, running infinitely.
+
 
 """
 
