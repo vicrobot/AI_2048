@@ -661,7 +661,6 @@ def argv_parser():
         except IndexError:
             mode, AI_level = 1, 30
             print(config.wrong_mode_args_string)
-    if not mode and not AI_level: AI_level=1
     return mode, AI_level
 
 
@@ -674,11 +673,9 @@ def grid_score(grid):
     # 3. Weight to have least similar numbers
     # 4. Use bootstrap, or as I say, use layer by layer from manual score to AI to manual score to AI scoring.
 
-    flattened = grid.flatten()
-    score = 0
-    for num in flattened:
-        score += 2**num
-    score += 2*np.count_nonzero(grid)#(len(np.argwhere(grid == 0)))
+    score =0
+    score += (2*grid).sum()
+    score += 2*np.count_nonzero(grid)#2*(len(np.argwhere(grid == 0)))
     return score
 
 
@@ -719,12 +716,12 @@ def get_move(grid,N=3):
                 count += 1
             score += grid_score(grid_cc) # adding all lives' wealth collections
         score /= N # average wealth collection
-        score = grid_score(grid_c) + score/10
         if score > max_score:
             best_move = move
             max_score=score
     return best_move
-
+        
+    
 
 
 ####
