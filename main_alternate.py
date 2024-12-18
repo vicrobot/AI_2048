@@ -661,6 +661,7 @@ def argv_parser():
         except IndexError:
             mode, AI_level = 1, 30
             print(config.wrong_mode_args_string)
+    if not mode and not AI_level: AI_level=1
     return mode, AI_level
 
 
@@ -674,11 +675,10 @@ def grid_score(grid):
     # 4. Use bootstrap, or as I say, use layer by layer from manual score to AI to manual score to AI scoring.
 
     flattened = grid.flatten()
-    sorted_flatten = sorted(flattened)
     score = 0
-    for num in sorted_flatten:
+    for num in flattened:
         score += 2**num
-    score += 2*(len(np.argwhere(grid == 0)))
+    score += 2*np.count_nonzero(grid)#(len(np.argwhere(grid == 0)))
     return score
 
 
@@ -713,18 +713,18 @@ def get_move(grid,N=3):
             # count to count the changes in the considered _th life
             count = 1
             # loop till death
-            while isvalid(grid_cc):
+            while isvalid(grid_cc) or count < 20:
                 move_random=random.choice(range(4)) #TODO: A suboptimal score algo can work here
                 board_instance.karma(move_random, grid_external=grid_cc)
                 count += 1
             score += grid_score(grid_cc) # adding all lives' wealth collections
         score /= N # average wealth collection
+        score = grid_score(grid_c) + score/10
         if score > max_score:
             best_move = move
             max_score=score
     return best_move
-        
-    
+
 
 
 ####
@@ -750,7 +750,7 @@ In this, we can reduce the times vector is evaluated from 4 to few.
 """
 ####
 
-def boardlog(logpath, grid_str):
+def boardlog(logpath, grid_str,move):
     with open(logpath,'a+') as fileobj:
         fileobj.write(move_map[move])
         fileobj.write(newline)
@@ -792,7 +792,7 @@ if __name__ == '__main__':
                 board_instance.time_start=time.time()
             board_instance.karma(move)
             #log the board
-            boardlog(boardlogpath,board_instance.grid.__str__())
+            boardlog(boardlogpath,board_instance.grid.__str__(),move)
                 
             board_instance.prettyprint(move,board_instance.grid)
             steps_count += 1
@@ -812,7 +812,7 @@ if __name__ == '__main__':
         #logpath
         boardlogpath = f'boardlog/ai/boardlog{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
         #log initial state:
-        boardlog(board_instance.grid.__str__())
+        boardlog(boardlogpath,board_instance.grid.__str__(),0)
         
         steps_count = 0
         while isvalid(board_instance.grid):
@@ -822,7 +822,7 @@ if __name__ == '__main__':
                 board_instance.time_start=time.time()
             board_instance.karma(move)
             #log the board
-            boardlog(board_instance.grid.__str__())
+            boardlog(boardlogpath,board_instance.grid.__str__(),move)
             board_instance.prettyprint(move,board_instance.grid)
             steps_count += 1
         print('\n'*10)
