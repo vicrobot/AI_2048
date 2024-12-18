@@ -47,6 +47,7 @@ move_map = dict(zip(range(4),['Up','Down','Left','Right']))
 
 class Board:
     #Time taken for 1000000 moves (karma): 16.4565s
+    #TODO: grid obj deals and copy etc will be eliminated if grid to number map and reverse can be done.
     def __init__(self):
         # config_fetch
         self.grid_size = config.grid_size
@@ -661,6 +662,7 @@ def argv_parser():
         except IndexError:
             mode, AI_level = 1, 30
             print(config.wrong_mode_args_string)
+    if not mode and not AI_level: AI_level=1
     return mode, AI_level
 
 
@@ -767,7 +769,7 @@ if __name__ == '__main__':
         #creating board instance
         board_instance = Board()
         #printing the initial grid()
-        board_instance.prettyprint(0,board_instance.grid)
+        board_instance.prettyprint(0,board_instance.grid,count=0)
         
         #logpath
         #TODO: Can we use logger for it, a side logger obj for this specific?
@@ -791,7 +793,7 @@ if __name__ == '__main__':
             #log the board
             boardlog(boardlogpath,board_instance.grid.__str__(),move)
                 
-            board_instance.prettyprint(move,board_instance.grid)
+            board_instance.prettyprint(move,board_instance.grid,count=steps_count)
             steps_count += 1
         print('\n'*10)
         score = board_instance.grid.max() # TODO: temporary right now. WIll need board evaluation.
@@ -805,7 +807,7 @@ if __name__ == '__main__':
         #creating board instance
         board_instance = Board()
         #printing the initial grid()
-        board_instance.prettyprint(0,board_instance.grid)
+        board_instance.prettyprint(0,board_instance.grid,count=0)
         #logpath
         boardlogpath = f'boardlog/ai/boardlog{datetime.now().strftime("%Y%m%d_%H%M%S")}.txt'
         #log initial state:
@@ -820,7 +822,7 @@ if __name__ == '__main__':
             board_instance.karma(move)
             #log the board
             boardlog(boardlogpath,board_instance.grid.__str__(),move)
-            board_instance.prettyprint(move,board_instance.grid)
+            board_instance.prettyprint(move,board_instance.grid,count=steps_count)
             steps_count += 1
         print('\n'*10)
         score = board_instance.grid.max() # TODO: temporary right now. WIll need board evaluation.
@@ -839,13 +841,6 @@ if __name__ == '__main__':
 
 """
 Bugs
-
-
-
-
-Something happened.
-Board is moving but not dying, somehow getting young, running infinitely.
-
 
 """
 
