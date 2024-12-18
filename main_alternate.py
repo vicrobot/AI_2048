@@ -667,16 +667,15 @@ def argv_parser():
 
 
 
-def grid_score(grid):
-    
+def grid_score(grid):   
     # some ideas
     # 1. Weight to have big numbers over their splits.
     # 2. Weight to have more space
     # 3. Weight to have least similar numbers
     # 4. Use bootstrap, or as I say, use layer by layer from manual score to AI to manual score to AI scoring.
 
-    score =0
-    score += (2*grid).sum()
+    score = 0
+    score += (grid).sum() #TODO: 2* grid doesn't do anything. 2** is intended, but that doesn't work.
     score += 2*np.count_nonzero(grid)#2*(len(np.argwhere(grid == 0)))
     return score
 
@@ -700,7 +699,8 @@ def get_move(grid,N=3):
         grid_c = grid.copy()
         
         # biased karma for that move.
-        board_instance.karma(move, grid_external=grid_c)
+        changed=board_instance.karma(move, grid_external=grid_c)
+        if not changed: continue
        
         score=0
         for _ in range(N):
@@ -723,9 +723,94 @@ def get_move(grid,N=3):
             max_score=score
     return best_move
         
+
+def getChildren(grid,human):
+    # humans can see mahimafal, nature will add in animafal to mahimafal.
     
+    #creating board instance
+    board_instance = Board()
+    
+    children = []
+    
+    #possible results for human moves.
+    if human:
+        for disha in range(4):
+            grid_mahimafalit,changed,empty_idxs = board_instance.mahimafalam(
+                            disha,inplace=False,grid_external=grid,return_copy=True)
+            if changed: children.append(grid_mahimafalit)
+    #possible results for nature animafalam (a limit to anima)
+    else:
+        zero_idxs = np.argwhere(grid==0)
+        for x,y in zero_idxs:
+            grid_c = grid.copy()
+            grid_c[x,y] = 2 if random.random() < 0.9 else 4 #not giving all children. #TODO
+            children.append(grid_c)
+    return children
+
+def expectimax(grid,depth, maximizing):
+    if depth <= 0 or not isvalid(grid): return grid_score(grid)
+    if maximizing:
+        sc = float('-inf')
+        for child in getChildren(grid, True): #will run 4 times at max
+            sc = max(sc, expectimax(child,depth-1,False))
+        return sc
+    if not maximizing: #chance node 
+        sc = 0
+        t = getChildren(grid, False)
+        for child in t:
+            sc += expectimax(child,depth-1,True)
+        return sc/max(len(t),1)
 
 
+def minimaxab(grid, alpha, beta,depth, maximizing):
+    #funcs used: isvalid, grid_score, getChildren
+    # number world mapping of board happens here.
+    # so, if we remove that process, what happens in essense is:
+    # those choosable branches are trimmed if we see that we have minimum guaranteed board better in choosable other branch we already traced.
+    # thus, instead of taking minimum best board everywhere, we have alpha and beta, the min best board to num map
+    # of minimizer and maximizer players
+    if depth <= 0 or not isvalid(grid): return grid_score(grid)
+    if maximizing:
+        sc = float('-inf')
+        for child in getChildren(grid, True): #will run 4 times at max
+            sc = max(sc, minimaxab(child,alpha,beta, depth-1,False))
+            if sc >= beta: return sc  #actually it is same as if alpha >= beta, 
+                                        #maximizing player need not to care now #mamavsbhanja
+            alpha = max(alpha, sc)
+        return sc
+    if not maximizing:
+        sc = float('inf')
+        for child in getChildren(grid, False):
+            sc = min(sc, minimaxab(child,alpha,beta, depth-1,True))
+            if sc < alpha: return sc # minimizer need not to care
+            beta = min(beta, sc)
+        return sc
+
+def get_move_minimax(grid,N=3):
+    board_instance = Board()
+    score_move_map = {0:0,1:0,2:0,3:0}
+    
+    max_score = 0
+    best_move = 0
+    
+    for move in range(4):
+        # copy the core grid before altering for virtuality. Copy per move.
+        grid_c = grid.copy()
+        
+        # biased karma for that move. #inplace modification is enabled by default
+        changed = board_instance.karma(move, grid_external=grid_c)
+        if not changed: continue 
+        score=0
+        #score += minimaxab(grid_c, -np.inf, np.inf, N, False)
+        score += expectimax(grid_c, N, True)
+        if score > max_score:
+            best_move = move
+            max_score=score
+    return best_move
+
+
+
+    
 ####
 """
 
@@ -801,7 +886,7 @@ if __name__ == '__main__':
         print(f"Steps: {steps_count:>4}, Score: {score:>2},",'Time: {:>6.6}s,'.format(final_T),end = '')
         print(f" Average Steps/s: {steps_count/final_T:5.4}")
         if score >= 2048:
-            print(strings.win_string)
+            print(config.win_string)
     else:
         print(f'AI Gameplay is On, level: {AI_level}')
         #creating board instance
@@ -830,7 +915,7 @@ if __name__ == '__main__':
         print(f"Steps: {steps_count:>4}, Score: {score:>2},",'Time: {:>6.6}s,'.format(final_T),end = '')
         print(f" Average Steps/s: {steps_count/final_T:5.4}")
         if score >= 2048:
-            print(strings.apocalypse_string)
+            print(config.apocalypse_string)
 
 
 

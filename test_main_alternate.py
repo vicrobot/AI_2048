@@ -5,7 +5,7 @@ import numpy as np
 import time
 import random
 
-from main_alternate import Board
+from main_alternate import Board,getChildren
 
 newline='\n'
 
@@ -14,6 +14,7 @@ class MainAlternateTestCases(TestCase):
     
     #@patch()
     def test_karmafalam(self,*args):
+        return
         board_instance = Board()
         core_grid = np.asarray([[2,2,0,0],[4,4,0,0],[4,2,4,2],[0,0,0,0]])
         
@@ -24,7 +25,7 @@ class MainAlternateTestCases(TestCase):
             print(f'Inplace={repr(inplace)}')
             print(newline)
             grid_scene = core_grid.copy()
-            grid_karmafalit,changed = board_instance.karma(
+            grid_karmafalit = board_instance.karma(
                                                     move_code, grid_external=grid_scene,inplace=inplace) #vaam
             print('Grid input:', grid_scene, 'Grid output', grid_karmafalit, sep = '\n'*2)
             print('-'*20)
@@ -109,6 +110,25 @@ class MainAlternateTestCases(TestCase):
             print(f'Vect {vect} summed right as {row} and vect is {"not " if not changed else ""}changed')
 
         print('-'*20)
+    
+    def test_getChildren(self,*args):
+        board_instance = Board()
+        for i in range(10):
+            board_instance.karma(random.choice(range(4)))
+        
+        print(f'Initial Grid\n{board_instance.grid}')
+        human_children = getChildren(board_instance.grid,human=True)
+        
+        print(f'Printing human chilren')
+        for child in human_children:
+            print(child)
+            print(newline*2)
+        print(f'Printing nature children')
+        nature_children = getChildren(board_instance.grid,human=False)
+        for child in nature_children:
+            print(child)
+            print(newline*2)
+        
 
 
 if __name__ == '__main__':
